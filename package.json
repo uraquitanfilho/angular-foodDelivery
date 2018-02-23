@@ -5,10 +5,10 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build --prod",
+    "lint": "tslint \"src/**/*.ts\" --project src/tsconfig.json --type-check && tslint \"e2e/**/*.ts\" --project e2e/tsconfig.json --type-check",
     "test": "ng test",
-    "lint": "ng lint",
-    "e2e": "ng e2e"
+    "pree2e": "webdriver-manager update --standalone false --gecko false",
+    "e2e": "protractor"
   },
   "private": true,
   "dependencies": {
@@ -21,8 +21,16 @@
     "@angular/platform-browser": "^5.2.0",
     "@angular/platform-browser-dynamic": "^5.2.0",
     "@angular/router": "^5.2.0",
+    "admin-lte": "^2.3.11",
     "core-js": "^2.4.1",
+    "font-awesome": "^4.7.0",
+    "intl": "^1.2.5",
+    "jquery": "^3.3.1",
+    "reflect-metadata": "^0.1.12",
     "rxjs": "^5.5.6",
+    "save-dev": "^2.0.0",
+    "ts-helpers": "^1.1.2",
+    "webdriver-manager": "^12.0.6",
     "zone.js": "^0.8.19"
   },
   "devDependencies": {
