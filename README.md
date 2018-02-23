@@ -26,6 +26,8 @@ We will see about:
 
 > [Initil page config](#initial-page-config)
 
+> [Components Header and Home](#components-header-and-home)
+
 ## Install Angular
 
 > To install Angular you just need node, npm and angular-cli
@@ -56,7 +58,7 @@ npm install
 _ps: You need to install [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 You can download the zip file too_
 
-##Creating the Project
+## Creating the Project
 
 > To create a new Angular project create a folder and type:
 ```
@@ -65,7 +67,7 @@ ng new foodDelivery --prefix=fd
 _ps: optional parameter: --prefix=fd will help you to distinct your components.
 All new component made by you will start with same "fd" prefix_
 
-##Install some packages
+## Install some packages
 
 > To our project, let's install some packages using npm or yarn as you prefer.
 * Go do project folder **foodDelivery**
@@ -87,8 +89,8 @@ npm install -g webdriver-manager
 * [ts-helpers]()
 * [webdriver-manager](https://www.npmjs.com/package/webdriver-manager)
 
-##Initial Page Config
-> Commit: [75f698b](https://github.com/uraquitanfilho/angular-foodDelivery/tree/75f698b27c17338a6064b2108a937d5ddaafedc7) 
+## Initial Page Config
+> Commit: [081e111](https://github.com/uraquitanfilho/angular-foodDelivery/tree/081e1117f96e5d6384a86a6e56ce7789cffcd064) 
 * Edit **foodDelivery/src/index.html**
 ```html
 <!doctype html>
@@ -200,3 +202,100 @@ export class AppComponent implements OnInit {
 
 }
   ```
+## Components Header and Home
+> Commit: []() 
+
+How to create a component ? Very simple. Go to terminal: <br/>
+**Directives**: <br/>
+**sintax** -> _ng generate component name_component_ <br/>
+**ng** -> base command to work with angular <br/>
+**generate** -> can be used only **g** <br/>
+**component** -> can be used only **c** <br/>
+**--spec=false** -> generate without test file 
+```
+ng g c header --spec=false
+```
+
+* Cut the header tag from **foodDelivery/src/app/app.component.html** and paste in the file: **foodeDelivery/src/app/header/header.componenet.html**
+
+```html
+    <!-- header start -->
+    <header class="main-header">
+    <nav class="navbar navbar-static-top">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand"><b>foodDelivery</b></a>
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse">
+            <i class="fa fa-bars"></i>
+          </button>
+        </div>
+  
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse pull-left" id="navbar-collapse">
+          <ul class="nav navbar-nav">
+              <li class="active"><a href="#">Restaurants</a></li>
+              <li><a href="#">About</a></li>
+          </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+  
+      </div>
+    </nav>
+   </header>
+```
+* now Let1s create the home component
+
+```
+ng g c home --spec=false
+```
+* Go to home folder and add this html code to **home-componenet.html**
+```html
+<section class="content-header">
+  </section>
+
+  <section class="content">
+
+    <div class="jumbotron welcome-jumbotron">
+       <h1>Welcome to Food Delivery!</h1>
+       <p>
+         Are you hungry? Ask and receive it at home.
+       </p>
+       <a class="btn btn-primary btn-lg" href="main-restaurants.html">See Restaurants</a>
+    </div>
+</section>
+```
+
+> How to use the componenet ?
+
+> Was created 2 new componets Header and Home. So, on the .ts file by the both components will see a section called: _@componenet_ The directive _selecor_ will show the name of the tag.
+> To both example : fd-header and fd-home. So, you need just to call the new tag on the app.component.html
+
+* Edit **app.componenet.html**
+```html
+<div class="wrapper">
+
+    <fd-header></fd-header>
+    
+    <!-- Full Width Column -->
+    <div class="content-wrapper">
+      <div class="container">
+  
+       <fd-home></fd-home>
+  
+      </div>
+    </div>
+  
+    <!-- snakbar deve ser aqui -->
+  
+    <footer class="main-footer">
+      <div class="container">
+        <div class="pull-right hidden-xs">
+          <b>Version</b> 1.0.0
+        </div>
+        <strong>foodDelivery</strong> Angular Application
+      </div>
+    </footer>
+  </div>
+```
+
+
