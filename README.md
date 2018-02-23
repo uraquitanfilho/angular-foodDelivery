@@ -49,7 +49,7 @@ _ps:You can work with vscode, atom, sublime, notepad++_
 > To clone the full project make a new folder and type:
 
 ```
-git clone https://github.com/cod3rcursos/meat-app-starter.git
+git clone https://github.com/uraquitanfilho/angular-foodDelivery.git
 ```
 * go to folder and type:
 ```
