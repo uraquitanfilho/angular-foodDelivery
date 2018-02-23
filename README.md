@@ -88,7 +88,7 @@ npm install -g webdriver-manager
 * [webdriver-manager](https://www.npmjs.com/package/webdriver-manager)
 
 ##Initial Page Config
-> Commit: []() 
+> Commit: [75f698b](https://github.com/uraquitanfilho/angular-foodDelivery/tree/75f698b27c17338a6064b2108a937d5ddaafedc7) 
 * Edit **foodDelivery/src/index.html**
 ```html
 <!doctype html>
