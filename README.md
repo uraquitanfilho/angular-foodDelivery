@@ -30,7 +30,7 @@ We will see about:
 
 > [Routes](#routes)
 
-> [Individual Component][#individual-component]
+> [Individual Component](#individual-component)
 
 ## Install Angular
 
@@ -422,7 +422,7 @@ export class AppModule { }
    <a class="btn btn-primary btn-lg" [routerLink]="['/restaurants']">See Restaurants</a>
 ```
 ## Individual Component
-> Commit: []()
+> Commit: [152b8dd](https://github.com/uraquitanfilho/angular-foodDelivery/commit/152b8dd50d3e6cba64c6366c3f4957c5bef81100)
 
 > We will learn how to work with properties inside the componenet using the **decorator @Input()**
 using an **interface** to represent the type of the propertie.
