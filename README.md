@@ -39,6 +39,8 @@ We will see about:
 
 > [Catch](#catch)
 
+> [Routes Parameter and Children Routes](#routes-parameter-and-children-routes)
+
 ## Install Angular
 
 > To install Angular you just need node, npm and angular-cli
@@ -1151,3 +1153,179 @@ export class ErrorHandler {
     }
 }
 ```
+##  Routes Parameter and Children Routes
+> Commit: []() 
+
+> Warning: I forgot to declare HttpModule to our modules so please, first go to **app.modules.ts**
+```javascript
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { AppComponent } from './app.component';
+import { HeaderComponent } from './header/header.component';
+import { HomeComponent } from './home/home.component';
+import { AboutComponent } from './about/about.component';
+import { RouterModule } from '@angular/router';
+import { ROUTES } from './app.routes';
+import { RestaurantComponent } from './restaurant/restaurant.component';
+import { StoreComponent } from './restaurant/store/store.component';
+import { RestaurantService } from './restaurant/restaurant.service';
+import { RestaurantDetailComponent } from './restaurant-detail/restaurant-detail.component';
+import { HttpModule } from '@angular/http'; //added
+
+
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    HeaderComponent,
+    HomeComponent,
+    AboutComponent,
+    RestaurantComponent,
+    StoreComponent,
+    RestaurantDetailComponent
+  ],
+  imports: [
+    BrowserModule,
+    RouterModule.forRoot(ROUTES),
+    HttpModule //added
+  ],
+  providers: [RestaurantService],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+
+```
+
+> Sometimes we need to pass parameters. So for it you will work using **/:param_name**
+
+> To access can be used 2 forms
+ - SNAPSHOT - More used. Case we have a static route
+ - SUBSCRIBE - dynamic routes. Example details of the restaurants
+
+* for it let's first create some components to make the router parameter example.
+* Let's create the component **restaurant-detail**
+```
+ng g c restaurant-detail --spec=false
+```
+* Add this code to **restaurant-detail.componenet.html**
+```html
+<section class="content-header">
+  <h1>
+
+  </h1>
+</section>
+<section class="content">
+  <div class="row">
+      <div class="col-xs-12">
+        <div class="box box-solid">
+          <div class="box-header with-border">
+            <i class="fa fa-home"></i>
+
+            <h3 class="box-title">{{restaurant?.name}}</h3><span class="pull-right"><i class="fa fa-star"></i>{{restaurant?.rating}}</span>
+          </div>
+          <!-- /.box-header -->
+          <div class="box-body">
+            <div class="col-sm-3 col-xs-12" *ngIf="restaurant"> <!-- only will show if exist imagePath -->
+              <img class="box-img-detail" [src]="restaurant?.imagePath" />
+            </div>
+
+            <dl class="col-sm-9 col-xs-12">
+              <dt>Category</dt>
+              <dd>{{restaurant?.category}}</dd>
+              <dt>About us</dt>
+              <dd>{{restaurant?.about}}</dd>
+              <dt>Operating Hours</dt>
+              <dd>{{restaurant.hours}}</dd>
+            </dl>
+          </div>
+          <!-- /.box-body -->
+          <div class="box-footer detail-footer">
+          <a class="pull-left" routerLinkActive="detail-active" [routerLink]="['menu']">
+             Menu
+          </a>
+          <a class="pull-right" routerLinkActive="detail-active" [routerLink]="['reviews']">
+             Assessments
+          </a>
+        </div>
+        </div>
+      </div>
+      <!-- /.col-xs-12 -->
+  </div>
+  <div class="row">
+      <router-outlet></router-outlet>
+  </div>
+</section>
+```
+* lets Create 3 new componenet inside **restaurant-detail**
+```
+ng g c restaurant-detail/menu --spec=false
+ng g c restaurant-detail/shopping-cart --spec=false
+ng g c restaurant-detail/menu-item --spec=false
+```
+* Now go to **restaurant/store/store.component.html** to add the call of the route
+```html
+<a [routerLink]="['/restaurants', store.id]"> <!-- was added the call to a route with parameter -->
+  <div class="place-info-box">
+    <span class="place-info-box-icon"><img [src]="store.imagePath" /></span>
+
+    <div class="place-info-box-content">
+      <span class="place-info-box-text">{{store.name}}</span>
+      <span class="place-info-box-star"><i class="fa fa-star"></i> {{store.rating}}</span>
+      <span class="place-info-box-detail">{{store.category}}</span>
+      <span class="place-info-box-detail">{{store.deliveryEstimate}}</span>
+    </div>
+    <!-- /.info-box-content -->
+  </div>
+</a>
+```
+* Let's create a new method in our service **src/app/restaurant/restaurant.service.ts**
+```javascript
+    restaurantById(id: string): Observable<Store> {
+      return this.http.get(`${URL_API}/restaurants/${id}`)
+        .map(response => response.json())
+        .catch(ErrorHandler.handleError);
+    }
+```
+* Now let's inject the service inside the restaurant-detail to have access to new method.
+ * Go to **src/app/restaurant-detail/restaurant-detail.componenet.ts**
+ ```javascript
+ 
+ ```
+##Now it's time to learn how to navigate between two children Components
+
+* Let's create a new componenet called **reviews**
+```
+ng g c restaurant-detail/reviews --spec=false
+```
+> ##Children Route and Parameter
+
+* Edit **src/app/app.routes.ts** 
+```javascript
+import { Routes } from '@angular/router';
+
+import {HomeComponent} from './home/home.component';
+import { AboutComponent } from './about/about.component';
+import { RestaurantComponent } from './restaurant/restaurant.component';
+import { RestaurantDetailComponent } from './restaurant-detail/restaurant-detail.component';
+import { MenuComponent } from './restaurant-detail/menu/menu.component';
+import { ReviewsComponent } from './restaurant-detail/reviews/reviews.component';
+
+export const ROUTES: Routes = [
+    {path: '', component: HomeComponent},
+    {path: 'about', component: AboutComponent},
+    {path: 'restaurants', component: RestaurantComponent},
+    //parameter
+    {path: 'restaurants/:id', component: RestaurantDetailComponent,
+    //children
+    children: [
+      //case add any word after restaurants, will redirect to menu  
+      {path: '', redirectTo: 'menu', pathMatch: 'full'},  
+      {path: 'menu', component: MenuComponent},
+      {path: 'reviews', component: ReviewsComponent},
+    ]
+  } 
+];
+```
+> To call a link for children you can't to use the **/**
+ - Not Correct : [routerLink]="['/reviews']"
+ - Correct form : [routerLink]="['reviews']"
