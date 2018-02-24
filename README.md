@@ -9,6 +9,7 @@ We will see about:
 * directives
 * pipes, pipes async, pipe currency 
 * modules, services and how to work with Restful API
+* catch directive to work with errors
 * reactive programs
 * react-form
 * comunication between componets
@@ -35,6 +36,8 @@ We will see about:
 > [Services](#services)
 
 > [Reactive Program and http](#reactive-program-and-http)
+
+> [Catch](#catch)
 
 ## Install Angular
 
@@ -1100,3 +1103,51 @@ export class RestaurantComponent implements OnInit {
 }
 ```
 > Done :) Just it to work with http access
+
+## Catch
+> Commit: []() 
+
+> we will learn to use the operator catch from **RXJS** and to use the command **instanceof**
+
+* First let's create a new **class** to work with our errors
+ * create a new class file **src/app/app.error-handler.ts**
+```javascript
+import {Response} from '@angular/http';
+import { Observable } from 'rxjs/Observable';
+
+export class ErrorHandler {
+    static handleError(error: Response | any) {
+        let errorMessage: string;
+        
+        if (error instanceof Response) {
+            errorMessage = `Error ${error.status} trying to access the URL ${error.url} - ${error.statusText}`;
+        } else {
+            errorMessage = error.toString();
+        }
+        console.log(errorMessage);
+        return Observable.throw(errorMessage);
+    }
+}
+```
+
+* Let's refactor our service file **restaurant.service.ts**
+```javascript
+import {Response} from '@angular/http';
+import { Observable } from 'rxjs/Observable';
+
+export class ErrorHandler {
+    static handleError(error: Response | any) {
+        let errorMessage: string;
+        
+        if (error instanceof Response) {
+            errorMessage = `Error ${error.status} trying to access the URL ${error.url} - ${error.statusText}`;
+        } else {
+            errorMessage = error.toString();
+        }
+        //sure, we are only show on the console. But you can to use other forms to alert the message to user.
+        //Was just to you understand how to work.
+        console.log(errorMessage);
+        return Observable.throw(errorMessage);
+    }
+}
+```
