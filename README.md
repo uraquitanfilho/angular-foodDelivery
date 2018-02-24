@@ -311,7 +311,7 @@ ng g c home --spec=false
   </div>
 ```
 ## Routes
-> Commit: []()
+> Commit: [e704b5a](https://github.com/uraquitanfilho/angular-foodDelivery/commit/e704b5a98bb1ec119929d48fa2e398d46a2e1b42)
 
 > Route is an array that contains a path for each component. It's possible to use parameters
 
@@ -1154,7 +1154,7 @@ export class ErrorHandler {
 }
 ```
 ##  Routes Parameter and Children Routes
-> Commit: []() 
+> Commit: [2d88f07](https://github.com/uraquitanfilho/angular-foodDelivery/tree/2d88f0793c336ca75fbc058189cbef8284f620b3) 
 
 > Warning: I forgot to declare HttpModule to our modules so please, first go to **app.modules.ts**
 ```javascript
