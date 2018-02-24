@@ -32,6 +32,8 @@ We will see about:
 
 > [Individual Component](#individual-component)
 
+> [Services](#services)
+
 ## Install Angular
 
 > To install Angular you just need node, npm and angular-cli
@@ -517,4 +519,108 @@ export class RestaurantComponent implements OnInit {
   </div>
 
 </section>
+```
+## services
+> Commit: []()
+
+> Service is a simple class. Generaly used to encapsule the back-end API.
+Can be Singletons
+
+> There are 3 scopes to declare a service:
+* Module -> providers: [] **global access to all components**
+* Component and child components -> providers:[] **Only to local component**
+* Only component -> viewProviders: [] **Child components without access**
+
+> Services can injectable other services, so need to use the decorator: **@Injectable()**
+_We will work with class too_ 
+
+* Let's create a service class to declare the back-end of the application.
+ * Create a service file inside restaurant folder called: **restaurant.service.ts**
+* For now our service class have static data YET.
+```javascript
+import {Store} from './store/store.model';
+
+export class ResturantService {
+    rests: Store[] = [
+        {
+          id: "bread-bakery",
+          name: "Bread & Bakery",
+          category: "Bakery",
+          deliveryEstimate: "25m",
+          rating: 4.9,
+          imagePath: "assets/img/restaurants/breadbakery.png"
+        },
+        {
+          id: "burger-house",
+          name: "Burger House",
+          category: "Hamburgers",
+          deliveryEstimate: "100m",
+          rating: 3.5,
+          imagePath: "assets/img/restaurants/burgerhouse.png"
+        }
+      ];    
+    constructor() {
+
+    }
+    restaurants(): Store[] {
+      return this.rests;
+    }
+}
+```
+* Edit **restaurant.component.ts**
+
+```javascript
+import { Component, OnInit } from '@angular/core';
+import { Store } from './store/store.model';
+import {RestaurantService} from './restaurant.service';
+
+@Component({
+  selector: 'fd-restaurant',
+  templateUrl: './restaurant.component.html'
+})
+export class RestaurantComponent implements OnInit {
+
+  restaurants: Store[] = [];
+  constructor(private restaurantService: RestaurantService) { }
+//inicialization of the component
+  ngOnInit() {
+    this.restaurants = this.restaurantService.restaurants();
+  }
+
+}
+``` 
+* Now we need to inject the service on the **app.module.ts**
+
+```javascript
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { AppComponent } from './app.component';
+import { HeaderComponent } from './header/header.component';
+import { HomeComponent } from './home/home.component';
+import { AboutComponent } from './about/about.component';
+import { RouterModule } from '@angular/router';
+import { ROUTES } from './app.routes';
+import { RestaurantComponent } from './restaurant/restaurant.component';
+import { StoreComponent } from './restaurant/store/store.component';
+import { RestaurantService } from './restaurant/restaurant.service';
+
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    HeaderComponent,
+    HomeComponent,
+    AboutComponent,
+    RestaurantComponent,
+    StoreComponent
+  ],
+  imports: [
+    BrowserModule,
+    RouterModule.forRoot(ROUTES)
+  ],
+  /*Inject service here*/
+  providers: [RestaurantService],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
 ```

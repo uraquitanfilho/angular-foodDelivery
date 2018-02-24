@@ -8,6 +8,8 @@ import { RouterModule } from '@angular/router';
 import { ROUTES } from './app.routes';
 import { RestaurantComponent } from './restaurant/restaurant.component';
 import { StoreComponent } from './restaurant/store/store.component';
+import { RestaurantService } from './restaurant/restaurant.service';
+
 
 @NgModule({
   declarations: [
@@ -22,7 +24,7 @@ import { StoreComponent } from './restaurant/store/store.component';
     BrowserModule,
     RouterModule.forRoot(ROUTES)
   ],
-  providers: [],
+  providers: [RestaurantService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
