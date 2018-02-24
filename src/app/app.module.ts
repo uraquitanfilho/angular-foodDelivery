@@ -7,6 +7,7 @@ import { AboutComponent } from './about/about.component';
 import { RouterModule } from '@angular/router';
 import { ROUTES } from './app.routes';
 import { RestaurantComponent } from './restaurant/restaurant.component';
+import { StoreComponent } from './restaurant/store/store.component';
 
 @NgModule({
   declarations: [
@@ -14,7 +15,8 @@ import { RestaurantComponent } from './restaurant/restaurant.component';
     HeaderComponent,
     HomeComponent,
     AboutComponent,
-    RestaurantComponent
+    RestaurantComponent,
+    StoreComponent
   ],
   imports: [
     BrowserModule,

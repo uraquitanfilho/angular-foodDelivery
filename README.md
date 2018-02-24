@@ -30,6 +30,8 @@ We will see about:
 
 > [Routes](#routes)
 
+> [Individual Component][#individual-component]
+
 ## Install Angular
 
 > To install Angular you just need node, npm and angular-cli
@@ -205,7 +207,7 @@ export class AppComponent implements OnInit {
 }
   ```
 ## Components Header and Home
-> Commit: []() 
+> Commit: [e704b5a](https://github.com/uraquitanfilho/angular-foodDelivery/tree/e704b5a98bb1ec119929d48fa2e398d46a2e1b42) 
 
 How to create a component ? Very simple. Go to terminal: <br/>
 **Directives**: <br/>
@@ -418,4 +420,101 @@ export class AppModule { }
 * Edit **src/app/home.component.html** to add the link to Restaurant route.
 ```html
    <a class="btn btn-primary btn-lg" [routerLink]="['/restaurants']">See Restaurants</a>
+```
+## Individual Component
+> Commit: []()
+
+> We will learn how to work with properties inside the componenet using the **decorator @Input()**
+using an **interface** to represent the type of the propertie.
+> We will learn too about the command ***ngFor**
+
+* lets create a new componenet inside restaurant
+```
+ng g c restaurant/store --spec=false
+```
+* Inside store folder, create a new **INTERFACE** file called: **store.model.ts**
+
+```javascript
+export interface Store {
+  id: string;
+  name: string;
+  category: string;
+  deliveryEstimate: string;
+  rating: number;
+  imagePath: string;
+}
+```
+
+* Edit **src/app/restaurant/store/store.componenet.ts**
+```javascript
+import { Component, OnInit, Input } from '@angular/core';
+
+import {Store} from './store.model';
+
+@Component({
+  selector: 'fd-store',
+  templateUrl: './store.component.html'
+})
+export class StoreComponent implements OnInit {
+ 
+  @Input() store: Store;
+  constructor() { }
+
+  ngOnInit() {
+  }
+}
+```
+* We don't have the back-end yet. So let's create a temporary array list to represent the back-end data. Go to **resaurant.component.ts**. After we will make the back-end. Not now. Step by step :)
+
+```javascript
+import { Component, OnInit } from '@angular/core';
+import { Store } from './store/store.model';
+
+@Component({
+  selector: 'fd-restaurant',
+  templateUrl: './restaurant.component.html'
+})
+export class RestaurantComponent implements OnInit {
+
+  restaurants: Store[] = [
+    {
+      id: "bread-bakery",
+      name: "Bread & Bakery",
+      category: "Bakery",
+      deliveryEstimate: "25m",
+      rating: 4.9,
+      imagePath: "assets/img/restaurants/breadbakery.png"
+    },
+    {
+      id: "burger-house",
+      name: "Burger House",
+      category: "Hamburgers",
+      deliveryEstimate: "100m",
+      rating: 3.5,
+      imagePath: "assets/img/restaurants/burgerhouse.png"
+    }
+  ];
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+}
+```
+* Now you will to learn how to use the command ***ngFor**. Go to restaurant.component.html
+```html
+<section class="content-header">
+  <h1>
+    All Restaurants
+  </h1>
+</section>
+<section class="content">
+
+  <div class="row">
+      <div *ngFor="let restaurant of restaurants" class="col-sm-6 col-xs-12">
+         <fd-store [store]="restaurant"></fd-store>
+      </div>
+  </div>
+
+</section>
 ```
