@@ -41,6 +41,8 @@ We will see about:
 
 > [Routes Parameter and Children Routes](#routes-parameter-and-children-routes)
 
+> [Pipes](#pipes)
+
 ## Install Angular
 
 > To install Angular you just need node, npm and angular-cli
@@ -1244,7 +1246,7 @@ ng g c restaurant-detail --spec=false
              Menu
           </a>
           <a class="pull-right" routerLinkActive="detail-active" [routerLink]="['reviews']">
-             Assessments
+             Ratting
           </a>
         </div>
         </div>
@@ -1329,3 +1331,187 @@ export const ROUTES: Routes = [
 > To call a link for children you can't to use the **/**
  - Not Correct : [routerLink]="['/reviews']"
  - Correct form : [routerLink]="['reviews']"
+
+## Pipes
+> Commit: []() 
+
+> Used to data transformations to show a different form. It's possible to format date, numbers, money, array JSON..
+
+> Pipes Examples:
+ * {{0.5 | percent}}
+ * {{birthday | date: 'dd/MM/yyyy'}}
+ * {{user.name | uppercase}}
+ * {{user.name | lowercase}}
+ * {{price | currency}} //default USD
+ * {{price | currency: 'BRL': true}}
+ * {{user.name | slice: 0:4}} //will return first 4 characters by string
+ * {{['one', 'two'] | slice: 0:1 | json | uppercase}} //will return ['ONE']
+
+ **Let's back to our project to use some pipes.**
+ 
+ > We will learn to use **pipe async** and **EventEmitter**
+  - pipe async will do the subscrible, take the data and will interate. So, more clean
+
+ * Let's create a new method to our service: **restaurant.service.ts**
+ ```javascript
+
+    reviewsOfRestaurant(id: string):Observable<any>{
+      return this.http.get(`${URL_API}/restaurants/${id}/reviews`)
+        .map(response => response.json())
+        .catch(ErrorHandler.handleError);
+    }
+ ```
+* Let's edit **reviews.component.ts**
+```javascript
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { RestaurantService } from '../../restaurant/restaurant.service';
+import { Observable } from 'rxjs/Observable';
+
+
+@Component({
+  selector: 'fd-reviews',
+  templateUrl: './reviews.component.html'
+})
+export class ReviewsComponent implements OnInit {
+  
+  reviews: Observable<any>;
+
+  constructor(private restaurantService: RestaurantService,
+              private route: ActivatedRoute) { }
+
+  ngOnInit() {
+    //ATTENTION: was used parent.snapshot WHY?
+    //because we are inside a children, so need to get the father route using parent.
+    this.reviews = this.restaurantService
+       .reviewsOfRestaurant(this.route.parent.snapshot.params['id']);
+  }
+
+}
+
+```
+
+* Let's edit **reviews.component.html**
+```html
+<div class="col-xs-12 col-sm-6" *ngFor="let review of reviews | async">
+    <div class="box box-solid">
+      <div class="box-header with-border">
+        <span class="review-score pull-right"><i class="fa fa-star"></i> {{review.rating}}</span>
+        <div class="user-block">
+          <img *ngIf="review.rating < 3" alt="User Image" class="img-circle" src="assets/img/reactions/pissed.png">
+          <img *ngIf="review.rating >= 3 && review.rating < 4" alt="User Image" class="img-circle" src="assets/img/reactions/soso.png">
+          <img *ngIf="review.rating >=4" alt="User Image" class="img-circle" src="assets/img/reactions/loved.png">
+          <span class="username">{{review.name}}</span>
+          <span class="description">{{review.date | date:'MM/dd/yyyy'}}</span>
+        </div>
+      </div>
+
+      <div class="box-body">
+        <p>{{review.comments}}</p>
+      </div>
+    </div>
+</div>
+```
+* Let's create an interface **src/app/restaurant-detail/menu-item/menu-item.model.ts**
+```javascript
+export interface MenuItem {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    imagePath: string;
+}
+```
+* Edit **menu-item.component.ts**
+```javascript
+import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
+import { MenuItem } from './menu-item.model';
+
+@Component({
+  selector: 'fd-menu-item',
+  templateUrl: './menu-item.component.html'
+})
+export class MenuItemComponent implements OnInit {
+  
+  @Input() menuItem: MenuItem;
+  //All event need to be used the decorator @Output
+  @Output() add = new EventEmitter();
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+  emitAddEvent(){
+    this.add.emit(this.menuItem);
+  }
+}
+```
+* **Edit menu-item.component.html**
+```html
+   <div class="menu-item-info-box">
+      <span class="menu-item-info-box-icon">
+        <img [src]="menuItem.imagePath">
+      </span>
+
+      <div class="menu-item-info-box-content">
+        <span class="menu-item-info-box-text">{{menuItem.name}}</span>
+        <span class="menu-item-info-box-detail">{{menuItem.description}}</span>
+        <span class="menu-item-info-box-price">{{menuItem.price | currency: 'BRL': true}}</span>
+        <a (click)="emitAddEvent()" class=""><i class="fa fa-plus-circle"></i> Add</a>
+      </div>
+  </div>
+```
+
+* Let's add a new method in our **restaurant.service.ts**
+```javascript
+    menuOfRestaurant(id: string): Observable<MenuItem[]> {
+      return this.http.get(`${URL_API}/restaurants/${id}/menu`)
+        .map(response => response.json())
+        .catch(ErrorHandler.handleError);
+    }
+```
+
+* Edit **menu.componenet.ts**
+```javascript
+import { Component, OnInit } from '@angular/core';
+import { RestaurantService } from '../../restaurant/restaurant.service';
+import { ActivatedRoute } from '@angular/router';
+import { Observable } from 'rxjs/Observable';
+import { MenuItem } from '../menu-item/menu-item.model';
+
+@Component({
+  selector: 'fd-menu',
+  templateUrl: './menu.component.html'
+})
+export class MenuComponent implements OnInit {
+  
+  menu: Observable<MenuItem[]>
+
+  constructor(private restaurantService: RestaurantService,
+              private route: ActivatedRoute) { }
+
+  ngOnInit() {
+    this.menu = this.restaurantService
+      .menuOfRestaurant(this.route.parent.snapshot.params['id']);
+  }
+  
+  addMenuItem(item: MenuItem) {
+    console.log(item);
+  }
+}
+
+```
+
+* Edit **menu.component.html**
+```html
+<div class="col-md-9 col-xs-12">
+  <fd-menu-item *ngFor="let item of menu | async" 
+  [menuItem]="item"
+  (add)="addMenuItem($event)"></fd-menu-item> 
+  <!-- $event is an object passed as parameter-->
+</div>
+<div class="col-md-3 col-xs-12">
+    <fd-shopping-cart></fd-shopping-cart>
+</div>
+```
