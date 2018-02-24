@@ -28,6 +28,8 @@ We will see about:
 
 > [Components Header and Home](#components-header-and-home)
 
+> [Routes](#routes)
+
 ## Install Angular
 
 > To install Angular you just need node, npm and angular-cli
@@ -297,5 +299,123 @@ ng g c home --spec=false
     </footer>
   </div>
 ```
+## Routes
+> Commit: []()
 
+> Route is an array that contains a path for each component. It's possible to use parameters
 
+Using routerLink it's possible to call a route.
+
+* Let's do an example: 
+ * For this example we will create a new component about
+ ```
+ ng g c about --spec=false
+ ```
+ Edit the file: **about.componenet.html**
+ ```html
+ <section class="content-header">
+  <h1>About</h1>
+</section>
+
+<section class="content">
+    <p class="lead">
+      foodDelivery | Angular
+    </p>
+    <p class="lead">
+      MIT license
+    </p>
+    <p class="lead">Copyright 2018 Uraquitan Filho (<a href="https://github.com/uraquitanfilho">Git Hub</a>)</p>
+    <p class="lead">Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
+    <p class="lead">The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.            </p>
+    <p class="lead">
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+    <p class="lead">
+      Images for this project was uploaded at <a href="http://www.freepik.com" target="_blank">freepik.com</a>
+    </p>
+  </section>
+ ```
+ * Let's create the restaurant componenet
+ ```
+ ng g c restaurant --spec=false
+ ```
+
+ * Now let create a route
+  * create a new file: **src/app/app.routes.ts**
+  ```javascript
+import { Routes } from '@angular/router';
+
+import {HomeComponent} from './home/home.component';
+import { AboutComponent } from './about/about.component';
+import { RestaurantComponent } from './restaurant/restaurant.component';
+
+export const ROUTES: Routes = [
+    {path: '', component: HomeComponent},
+    {path: 'about', component: AboutComponent},
+    {path: 'restaurants', component: RestaurantComponent},
+];
+  ```
+* We need import the **app.routes.ts** on the **app.modules.ts**
+```javascript
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { AppComponent } from './app.component';
+import { HeaderComponent } from './header/header.component';
+import { HomeComponent } from './home/home.component';
+import { AboutComponent } from './about/about.component';
+// was imported to work with route
+// ==========================================
+import { RouterModule } from '@angular/router';
+import { ROUTES } from './app.routes';
+// ==========================================
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    HeaderComponent,
+    HomeComponent,
+    AboutComponent
+  ],
+  imports: [
+    BrowserModule,
+    RouterModule.forRoot(ROUTES) //was imported
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+
+```
+* Now we need edit our principal componenet **src/app/app.componenet.html**
+  * remove the tag: <fd-home></fd-home>
+  * add: <router-outlet></router-outlet> 
+* Let's edit the link on the page **src/app/header/header.component.html**
+```html
+    <!-- header start -->
+    <header class="main-header">
+    <nav class="navbar navbar-static-top">
+      <div class="container">
+        <div class="navbar-header">
+          <a [routerLink]="['/']" class="navbar-brand"><b>foodDelivery</b></a>
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse">
+            <i class="fa fa-bars"></i>
+          </button>
+        </div>
+  
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse pull-left" id="navbar-collapse">
+          <ul class="nav navbar-nav">
+              <li routerLinkActive="active"><a [routerLink]="['/restaurants']">Restaurants</a></li>
+              <li routerLinkActive="active"><a [routerLink]="['/about']">About</a></li>
+          </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+  
+      </div>
+    </nav>
+   </header>
+```
+   _routerLinkActive receives as parameter the class css to control the active click_ 
+* Edit **src/app/home.component.html** to add the link to Restaurant route.
+```html
+   <a class="btn btn-primary btn-lg" [routerLink]="['/restaurants']">See Restaurants</a>
+```
