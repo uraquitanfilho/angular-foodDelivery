@@ -10,8 +10,8 @@ We will see about:
 * pipes, pipes async, pipe currency 
 * modules, services and how to work with Restful API
 * catch directive to work with errors
-* reactive programs
-* react-form
+* template-forms
+* reactive-form
 * comunication between componets
 * reuse components
 * how to integrate components with form directive
@@ -44,6 +44,10 @@ We will see about:
 > [Pipes](#pipes)
 
 > [Shopping Cart](#shopping-cart)
+
+> [Template Forms and Validation](#template-forms-and-validation)
+
+> [Component using Control Value Accessor](#component-using-control-value-accessor)
 
 ## Install Angular
 
@@ -1518,7 +1522,7 @@ export class MenuComponent implements OnInit {
 </div>
 ```
 ## Shopping Cart
-> Commit: []()
+> Commit: [b508644](https://github.com/uraquitanfilho/angular-foodDelivery/tree/b508644af4125822db5f6ffaac4115c9798663c3)
 
 * First let's create a class model to cart. **src/app/restaurant-detail/shopping-cart/cart-item.model.ts**
 ```javascript
@@ -1664,4 +1668,551 @@ export class ShoppingCartComponent implements OnInit {
     <fd-shopping-cart #shoppingCart></fd-shopping-cart>
 </div>
 ```
+## Template Forms and Validation
+> Commit: [081e111](https://github.com/uraquitanfilho/angular-foodDelivery/tree/081e1117f96e5d6384a86a6e56ce7789cffcd064) 
 
+* First we need to create a new componenet to make the template Forms example.
+ ** Lets create a new component
+ ```
+ ng g c order --spec=false
+ ```
+ * Go to **app.routes.ts** to add the new route
+
+ ```javascript
+ {path: 'order', component: OrderComponent}
+ ```
+
+ * Edit **shopping-cart-component.ts** 
+
+ > change the line **39**: 
+
+ ```html
+ <a [routerLink]="['/order']" class="btn btn-success"><i class="fa fa-credit-card"></i> Close Order</a>
+ ```
+ > To work with forms you need disable the browser's validation using the directive **novalidate** on the tag form and call **ngForm**
+ ```html
+   <form #form="ngForm" novalidate>
+ ```
+ _ps: You need first inject the **FormsModule** than, go to **app.module.ts** to import.
+ ```javascript
+ ...
+ import {FormsModule} from '@angular/forms';
+
+ ...
+ imports: [
+   ...
+   FormsModule
+ ]
+ ```
+ > the name of need to be declared and the directive ngModel. Example:
+ ```html
+   <input type="text" name="address" ngModel placeHolder="Address" />
+ ```
+ > To **validation** you can use
+  - required
+  - minlength
+  - maxlength
+  - pattern - works with regular expression
+
+ > than, to disable the submit button case form not valid you need add the attribute **[disabled]** 
+ ```html
+<button class="btn btn-success pull-right" [disabled]="!form.valid"><i class="fa fa-credit-card"></i> Finish Order </button>
+ ```
+## How to know if the information was wrotten on the form ?
+
+> We can use a template variable ex:
+```html
+ <input type="text" name="address" #my_variable="ngModel" ngModel placeHolder="Address" />
+```
+
+* Let's create a componenet to represent the **Input Text**
+ * First lets create a new folder called **src/app/shared**
+```
+ng g c shared/input --spec=false
+``` 
+* Input works inside the form. A componenet is outside. So the form no more has the control about the input.
+For it, we have 2 forms to solve it. The first is about to make a **component container**. Let's refactor our **input.component.ts**
+```javascript
+import { Component, OnInit, Input, ContentChild, AfterContentInit } from '@angular/core';
+import { NgModel} from '@angular/forms';
+
+@Component({
+  selector: 'fd-input-container',
+  templateUrl: './input.component.html'
+})
+export class InputComponent implements OnInit, AfterContentInit {
+  
+  @Input() label: string;
+  @Input() errorMessage: string;
+  @Input() inputId: string;
+
+  input: any;
+  //using contentChild, the Angular can inject references to the component.
+  //To make it, we need the interface AfterContentInit
+  @ContentChild(NgModel) model: NgModel;
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+  ngAfterContentInit() {
+    this.input = this.model;
+    if(this.input === undefined) {
+      throw new Error("this componenet need to be used with a ngModel Directive");
+    }
+  }
+
+  hasSuccess(): boolean {
+    return this.input.valid && (this.input.dirty || this.input.touched)
+  }
+
+  hasError(): boolean {
+    return this.input.invalid && (this.input.dirty || this.input.touched)
+  }
+
+}
+
+```
+* **input.component.html**
+```html
+<div class="form-group" [class.has-success]="hasSuccess()"
+[class.has-error]="hasError()">
+<label class="control-label sr-only" for="{{inputId}}"><i class="fa fa-check"></i> {{label}}</label>
+
+<ng-content></ng-content>
+
+<span class="help-block" *ngIf="hasSuccess()"><i class="fa fa-check"></i> Ok</span>
+<span class="help-block" *ngIf="hasError()"><i class="fa fa-remove"></i>{{errorMessage}}</span>
+</div>
+```
+
+
+## Component using Control Value Accessor
+
+_To control the check events we need to extends the interface **ControlValueAccessor**_
+
+> Let's create a new component to represent radio box.
+```
+ng g c shared/radio --spec=false
+```
+* Let's create a new class **/src/app/shared/radio/radio-option.model.ts**
+```javascript
+export class RadioOption {
+    constructor(public label: string, public value: any) {}
+}
+```
+* **radio.component.ts**
+```javascript
+import { Component, OnInit, Input, forwardRef } from '@angular/core';
+import { RadioOption} from './radio-option.model';
+import {NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
+
+@Component({
+  selector: 'fd-radio',
+  templateUrl: './radio.component.html',
+
+  providers: [
+    {
+      //this is necessary to register as a value accessor component
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => RadioComponent),
+      multi: true
+    }
+  ]
+})
+export class RadioComponent implements OnInit, ControlValueAccessor {
+
+  @Input() options: RadioOption[];
+
+  value: any;
+
+  onChange: any;
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+  setValue(value:any) {
+    this.value = value;
+    this.onChange(this.value);
+  }
+
+  /*ControlValueAccessor Interface */
+  //used to send value to component
+  writeValue(obj:any): void {
+     this.value = obj;
+  }
+  //if interval value to changes, this method will be called
+  registerOnChange(fn: any): void {
+    this.onChange = fn;
+  }
+  
+  registerOnTouched(fn: any): void {
+
+  }
+
+  setDisabledState?(isDisabled: boolean): void {
+
+  }
+}
+
+```
+
+* **radio.component.html**
+```html
+<div *ngFor="let option of options">
+    <label>
+      <div (click)="setValue(option.value)" class="iradio_flat-red" [class.checked]="option.value===value" aria-checked="false" aria-disabled="false"
+          style="position: relative;">
+          <ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins>
+      </div>
+      {{option.label}}
+    </label>
+</div>
+```
+
+* **order.componenent.ts**
+```javascript
+import { Component, OnInit } from '@angular/core';
+import { RadioOption } from '../shared/radio/radio-option.model';
+
+@Component({
+  selector: 'fd-order',
+  templateUrl: './order.component.html'
+})
+export class OrderComponent implements OnInit {
+
+  paymentOptions: RadioOption[] = [
+    {label: "Cache", value: "MON"},
+    {label: "Debit Card", value: "DEB"},
+    {label: "Credit Card", value: "CRE"}
+  ];
+  constructor() { }
+
+  ngOnInit() {
+  }
+}
+```
+
+* Time to create a new component to list the items
+```javascript
+ng g c order/order-items --spec=false
+```
+* add 2 new methods to **src/app/restaurant-detail/shopping-cart/shopping-cart.service.ts**
+```javascript
+    increaseQty(item: CartItem) {
+      item.quantity = item.quantity + 1;
+    }
+
+    deCreaseQty(item: CartItem) {
+      item.quantity = item.quantity - 1;
+      if(item.quantity === 0) {
+        this.removeItem(item);
+      }
+    }
+```
+
+* Let's create a new service **src/app/order/order.service.js**
+_ps: Don't forget to inject **OrderService** on the file: **app.module.ts**_
+
+```javascript
+
+```
+
+* **order.items.component.ts**
+```javascript
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { CartItem } from '../../restaurant-detail/shopping-cart/cart-item.model';
+
+@Component({
+  selector: 'fd-order-items',
+  templateUrl: './order-items.component.html'
+})
+export class OrderItemsComponent implements OnInit {
+  
+  @Input() items: CartItem[];
+  
+  @Output() increaseQty = new EventEmitter<CartItem>();
+  @Output() decreaseQty = new EventEmitter<CartItem>();
+  @Output() remove = new EventEmitter<CartItem>();
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+  emitIncreaseQty(item: CartItem) {
+    this.increaseQty.emit(item);
+  }
+
+  emitDecreaseQty(item: CartItem) {
+    this.decreaseQty.emit(item);
+  }
+
+  emitRemove(item: CartItem) {
+    this.remove.emit(item);
+  }
+
+}
+```
+
+* **order.items.component.html**
+```html
+<div class="col-xs-12" *ngIf="items.length <= 0">
+   <p>
+     Your shopping cart is empty.
+     What about start <a [routerLink]="['/restaurants']">here</a> !
+   </p>
+</div>
+<div class="col-xs-12 table-responsive" *ngIf="items.length > 0">
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th class="text-center">Quantity</th>
+      <th>Item</th>
+      <th>Description</th>
+      <th class="text-right">Subtotal</th>
+      <th class="text-right"></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let item of items">
+      <td class="text-center">
+        <a (click)="emitDecreaseQty(item)" class="btn btn-sm"><i class="fa fa-minus"></i></a>
+        {{item.quantity}}
+        <a (click)="emitIncreaseQty(item)" class="btn btn-sm"><i class="fa fa-plus"></i></a>
+      </td>
+      <td>{{item.menuItem.name}}</td>
+
+      <td>{{item.menuItem.description}}</td>
+      <td class="text-right">{{item.value() | currency: 'BRL': true}}</td>
+      <td class="text-right">
+        <a (click)="emitRemove(item)" class="btn btn-sm danger"><i class="fa fa-remove"></i></a>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+```
+
+* Now lets make the delivery cost component
+```
+ ng g c order/delivery-cost --spec=false
+```
+
+* Sending data to back-end
+ * Go to **order.component.ts** Add a new method
+```javascript
+   checkOrder(order: any) {
+     console.log(order);
+   }
+```
+
+* create a new class model called : **src/app/order/order.model.ts**
+> This object will send to back-end the data form.
+
+```javascript
+class Order {
+   constructor(
+       public address: string,
+       public number: number,
+       public optionalAddress: string,
+       public paymentOption: string,
+       public orderItems: OrderItem[]
+   ) {}
+}
+
+class OrderItem {
+    constructor(public quantity: number, public menuId: string){}
+}
+
+export { Order, OrderItem}
+```
+
+* Add 2 new methods to **order.service.ts**
+```javascript
+    checkOrder(order): Observable<string>{
+     const headers = new Headers();
+     headers.append('Content-Type','application/json');
+     //To work with post method, need to send the header. So to work with headers need send an object by RequestOptions
+     return this.http.post(`${URL_API}/orders`, 
+                           JSON.stringify(order), 
+                           new RequestOptions({headers: headers})
+                         ).map(response => response.json());
+    }
+
+    clear() {
+        this.cartService.clear();
+    }
+```
+
+* Let's create the **order-sumary** component to send a message to user after finished the order
+```
+ ng g c order-summary --spec=false
+```
+
+go to **app.routes.ts**
+```javascript
+...
+import { OrderSummaryComponent } from './order-summary/order-summary.component';
+...
+{path: 'order-summary', component: OrderSummaryComponent} 
+```
+
+
+
+
+
+
+* **src/app/order/order.component.js**
+```javascript
+import { Component, OnInit } from '@angular/core';
+import { RadioOption } from '../shared/radio/radio-option.model';
+import { OrderService } from './order.service';
+import { CartItem } from '../restaurant-detail/shopping-cart/cart-item.model';
+import {Order, OrderItem} from './order.model';
+
+//another form to work with routes.
+import {Router} from '@angular/router';
+@Component({
+  selector: 'fd-order',
+  templateUrl: './order.component.html'
+})
+export class OrderComponent implements OnInit {
+
+  //fixed on the code. But it can be called by a RestAPI.
+  //for this example our cost delivery = 8 always.
+  delivery: number = 8;
+
+  paymentOptions: RadioOption[] = [
+    {label: "Cache", value: "MON"},
+    {label: "Debit Card", value: "DEB"},
+    {label: "Credit Card", value: "CRE"}
+
+  ];
+  constructor(private orderService: OrderService, private router: Router ) { }
+
+  ngOnInit() {
+  }
+  itemsValue(): number {
+    return this.orderService.itemsValue();
+  }
+  //to show the items
+  cartItems (): CartItem[]{
+    return this.orderService.cartItems();
+  }
+
+  increaseQty(item: CartItem){
+    this.orderService.increaseQty(item);
+  }
+
+  decreaseQty(item: CartItem) {
+    this.orderService.decreaseQty(item);
+  }
+
+  remove(item:CartItem) {
+    this.orderService.remove(item);
+  }
+ 
+  checkOrder(order: any) {
+    order.OrderItem = this.cartItems()
+      .map((item:CartItem) => new OrderItem(item.quantity, item.menuItem.id));
+    this.orderService.checkOrder(order).subscribe((orderId)=> {
+      this.router.navigate(['/order-summary']); //direct router call without routerLink
+      console.log(`finished payment: ${orderId}`);
+      this.orderService.clear();
+    });  
+    console.log(order);
+  }
+}
+
+```
+
+* **src/app/order/order.component.html**
+```html
+<section class="content-header">
+  </section>
+
+  <section class="content">
+    <section class="invoice">
+          <form #form="ngForm" novalidate>
+            <div class="row">
+              <div class="col-xs-12">
+                <h2 class="page-header">
+                  <i class="fa fa-shopping-cart"></i> Finish your order
+                </h2>
+              </div>
+            </div>                
+
+            <div class="row invoice-info">
+              <div class="col-xs-12">
+                <p class="lead">Delivery address:</p>
+              </div>
+              <div class="col-sm-6 col-xs-12">
+                 <fd-input-container errorMessage="required and min 5 characters" inputId="address" label="Address">
+                   <input class="form-control" name="address" id="address" placeholder="Address" ngModel required minlength="5" autocomplete="false" />
+                 </fd-input-container>
+              </div>
+              <div class="col-sm-3 col-xs-6">
+                  <fd-input-container errorMessage="required and only number" inputId="number" label="Number">
+                      <input class="form-control" name="number" id="number" ngModel placeHolder="Number" pattern="^[0-9]*$" required autocomplete="false" />
+                  </fd-input-container>
+              </div>
+              <div class="col-sm-3 col-xs-6">
+                  <fd-input-container inputId="optionalAddress">
+                      <input type="text" class="form-control" name="optionalAddress" ngModel id="optionalAddress" placeholder="Optional Address">
+                  </fd-input-container>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+
+            <!-- Table row -->
+            <div class="row">
+              <div class="col-xs-12">
+                <p class="lead">Order Items:</p>
+              </div>
+              
+                <fd-order-items [items]="cartItems()"
+                   (increaseQty)="increaseQty($event)"
+                   (decreaseQty)="decreaseQty($event)"
+                   (remove)="remove($event)"></fd-order-items>
+              
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+
+            <div class="row">
+              <!-- accepted payments column -->
+              <div class="col-sm-6 col-xs-12">
+                <p class="lead">Payment</p>
+
+                  <div class="form-group">
+
+                    <fd-radio [options]="paymentOptions" name="paymenetOption" ngModel required></fd-radio>
+
+                  </div>
+
+              </div>
+              <!-- /.col -->
+              <div class="col-sm-6 col-xs-12">
+                <p class="lead">Delivery Cost and Total:</p>
+                <fd-delivery-cost [delivery]="delivery"
+                  [itemsValue]="itemsValue()"></fd-delivery-cost>
+              </div>
+              <!-- /.col -->
+            </div>
+          </form>
+          <div class="row">
+            <div class="col-xs-12">
+              <button (click) ="checkOrder(form.value)" class="btn btn-success pull-right" 
+                      [disabled]="!form.valid || cartItems().length===0">
+                      <i class="fa fa-credit-card"></i> Finish Order
+              </button>
+            </div>
+          </div>
+
+      </section>
+  </section>
+```

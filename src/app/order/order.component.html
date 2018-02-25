@@ -1,0 +1,87 @@
+<section class="content-header">
+  </section>
+
+  <section class="content">
+    <section class="invoice">
+          <form #form="ngForm" novalidate>
+            <div class="row">
+              <div class="col-xs-12">
+                <h2 class="page-header">
+                  <i class="fa fa-shopping-cart"></i> Finish your order
+                </h2>
+              </div>
+            </div>                
+
+            <div class="row invoice-info">
+              <div class="col-xs-12">
+                <p class="lead">Delivery address:</p>
+              </div>
+              <div class="col-sm-6 col-xs-12">
+                 <fd-input-container errorMessage="required and min 5 characters" inputId="address" label="Address">
+                   <input class="form-control" name="address" id="address" placeholder="Address" ngModel required minlength="5" autocomplete="false" />
+                 </fd-input-container>
+              </div>
+              <div class="col-sm-3 col-xs-6">
+                  <fd-input-container errorMessage="required and only number" inputId="number" label="Number">
+                      <input class="form-control" name="number" id="number" ngModel placeHolder="Number" pattern="^[0-9]*$" required autocomplete="false" />
+                  </fd-input-container>
+              </div>
+              <div class="col-sm-3 col-xs-6">
+                  <fd-input-container inputId="optionalAddress">
+                      <input type="text" class="form-control" name="optionalAddress" ngModel id="optionalAddress" placeholder="Optional Address">
+                  </fd-input-container>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+
+            <!-- Table row -->
+            <div class="row">
+              <div class="col-xs-12">
+                <p class="lead">Order Items:</p>
+              </div>
+              
+                <fd-order-items [items]="cartItems()"
+                   (increaseQty)="increaseQty($event)"
+                   (decreaseQty)="decreaseQty($event)"
+                   (remove)="remove($event)"></fd-order-items>
+              
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+
+            <div class="row">
+              <!-- accepted payments column -->
+              <div class="col-sm-6 col-xs-12">
+                <p class="lead">Payment</p>
+
+                  <div class="form-group">
+
+                    <fd-radio [options]="paymentOptions" name="paymenetOption" ngModel required></fd-radio>
+
+                  </div>
+
+              </div>
+              <!-- /.col -->
+              <div class="col-sm-6 col-xs-12">
+                <p class="lead">Delivery Cost and Total:</p>
+                <fd-delivery-cost [delivery]="delivery"
+                  [itemsValue]="itemsValue()"></fd-delivery-cost>
+              </div>
+              <!-- /.col -->
+            </div>
+
+          </form>
+
+          <div class="row">
+            <div class="col-xs-12">
+              <button (click) ="checkOrder(form.value)" class="btn btn-success pull-right" 
+                      [disabled]="!form.valid || cartItems().length===0">
+                      
+                      <i class="fa fa-credit-card"></i> Finish Order
+              </button>
+            </div>
+          </div>
+
+      </section>
+  </section>
