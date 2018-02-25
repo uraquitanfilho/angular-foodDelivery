@@ -43,6 +43,8 @@ We will see about:
 
 > [Pipes](#pipes)
 
+> [Shopping Cart](#shopping-cart)
+
 ## Install Angular
 
 > To install Angular you just need node, npm and angular-cli
@@ -1515,3 +1517,151 @@ export class MenuComponent implements OnInit {
     <fd-shopping-cart></fd-shopping-cart>
 </div>
 ```
+## Shopping Cart
+> Commit: []()
+
+* First let's create a class model to cart. **src/app/restaurant-detail/shopping-cart/cart-item.model.ts**
+```javascript
+import {MenuItem} from '../menu-item/menu-item.model';
+
+export class CartItem {
+    constructor(public menuItem: MenuItem,
+                public quantity: number = 1) {}
+    
+    value(): number {
+        return this.menuItem.price * this.quantity;
+    }
+}
+```
+
+* Let's create a new service **src/app/restaurant-detail/shopping-cart/shopping-cart.service.ts**
+
+```javascript
+import { CartItem } from "./cart-item.model";
+import { MenuItem } from "../menu-item/menu-item.model";
+
+export class ShoppingCartService {
+    
+    items: CartItem[] = [];
+
+    clear() {
+      this.items = [];
+    }
+    
+    addItem(item:MenuItem) {
+       let foundItem = this.items.find((mItem) => mItem.menuItem.id === item.id);
+       if(foundItem) {
+         foundItem.quantity = foundItem.quantity + 1;  
+       } else {
+           this.items.push(new CartItem(item));
+       }
+    }
+
+    removeItem(item: CartItem) {
+       this.items.splice(this.items.indexOf(item), 1);
+    }
+
+    total(): number {
+        return this.items
+          .map(item => item.value())
+          .reduce((prev, value) => prev + value, 0); // reduce will adds two parametes, prev + value and will start with 0
+    }
+}
+```
+
+* Edit **shopping-cart-component.ts**
+```javascript
+import { Component, OnInit } from '@angular/core';
+import {ShoppingCartService} from './shopping-cart.service';
+
+@Component({
+  selector: 'fd-shopping-cart',
+  templateUrl: './shopping-cart.component.html'
+})
+export class ShoppingCartComponent implements OnInit {
+
+  constructor(private shoppingCartService: ShoppingCartService) { }
+
+  ngOnInit() {
+  }
+
+  items(): any[] {
+    return this.shoppingCartService.items;
+  }
+
+  total(): number {
+    return this.shoppingCartService.total();
+  }
+}
+```
+> Go to **app.modules.ts** to add our new service do same as **RestaurantService**
+
+* Time to edit **shopping-cart-componenet.html**
+```html
+<div class="box box-solid">
+  <div class="box-header">
+    <i class="fa fa-shopping-cart"></i>
+
+    <h3 class="box-title">Cart Delivery</h3>
+  </div>
+  <!-- /.box-header -->
+  <div class="box-body">
+    <div *ngIf="!items().length">
+       <p class="text-center">Empty shopping cart</p>
+    </div>
+    <div class="table-responsive" *ngIf="items().length">
+        <table class="table">
+          <tbody>
+          <tr *ngFor="let item of items()">
+            <th>({{item.quantity}}x) {{item.menuItem.name}}</th>
+            <td class="text-right">{{item.value() | currency: 'BRL': true}}</td>
+            <td class="text-right">
+              <a (click)="removeItem(item)" class="btn btn-sm danger"><i class="fa fa-remove"></i></a>
+            </td>
+          </tr>
+          <tr>
+            <th>Total:</th>
+
+            <td class="text-right">{{total() | currency: 'BRL': true}}</td>
+          </tr>
+        </tbody></table>
+      </div>
+  </div>
+  <div class="box-footer" *ngIf="items().length">
+    <div class="pull-right">
+      <button (click)="clear()" type="button" class="btn btn-danger"><i class="fa fa-trash"></i> Clear</button>
+      <a href="order.html" class="btn btn-success"><i class="fa fa-credit-card"></i> Close Order</a>
+    </div>
+  </div>
+</div>
+```
+
+* Now We need to create the events.
+ * event clear, removeItem, addItem to add the button click Clear. Edit the **shopping-cart.componenet.ts** to add the new method:
+ ```javascript
+  
+  clear() {
+    return this.shoppingCartService.clear();
+  }
+
+  removeItem(item: any) {
+    this.shoppingCartService.removeItem(item);
+  }
+
+  addItem(item: any) {
+    this.shoppingCartService.addItem(item);
+  }
+ ```
+* We need do a refactor. Go to **menu.componenet.html** to refer the Event addItem
+```html
+<div class="col-md-9 col-xs-12">
+  <fd-menu-item *ngFor="let item of menu | async" 
+  [menuItem]="item"
+  (add)="shoppingCart.addMenuItem($event)"></fd-menu-item> 
+ 
+</div>
+<div class="col-md-3 col-xs-12">
+    <fd-shopping-cart #shoppingCart></fd-shopping-cart>
+</div>
+```
+

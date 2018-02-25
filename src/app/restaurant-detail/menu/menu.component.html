@@ -1,9 +1,10 @@
 <div class="col-md-9 col-xs-12">
-  <fd-menu-item *ngFor="let item of menu | async" 
-  [menuItem]="item"
-  (add)="addMenuItem($event)"></fd-menu-item> 
- 
-</div>
-<div class="col-md-3 col-xs-12">
-    <fd-shopping-cart></fd-shopping-cart>
-</div>
+    <fd-menu-item *ngFor="let item of menu | async" 
+    [menuItem]="item"
+    (add)="shoppingCart.addItem($event)"></fd-menu-item> 
+   
+  </div>
+  <div class="col-md-3 col-xs-12">
+      <fd-shopping-cart #shoppingCart></fd-shopping-cart>
+  </div>
+  
