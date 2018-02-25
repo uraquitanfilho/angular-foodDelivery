@@ -1669,7 +1669,7 @@ export class ShoppingCartComponent implements OnInit {
 </div>
 ```
 ## Template Forms and Validation
-> Commit: [081e111](https://github.com/uraquitanfilho/angular-foodDelivery/tree/081e1117f96e5d6384a86a6e56ce7789cffcd064) 
+> Commit: [616d01e](https://github.com/uraquitanfilho/angular-foodDelivery/tree/616d01e5b3cb6db23a0009e5a88c8652f0f1a12b) 
 
 * First we need to create a new componenet to make the template Forms example.
  ** Lets create a new component
@@ -2059,11 +2059,6 @@ import { OrderSummaryComponent } from './order-summary/order-summary.component';
 ...
 {path: 'order-summary', component: OrderSummaryComponent} 
 ```
-
-
-
-
-
 
 * **src/app/order/order.component.js**
 ```javascript
