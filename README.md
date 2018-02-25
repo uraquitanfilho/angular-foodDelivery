@@ -1333,7 +1333,7 @@ export const ROUTES: Routes = [
  - Correct form : [routerLink]="['reviews']"
 
 ## Pipes
-> Commit: []() 
+> Commit: [51472cd](https://github.com/uraquitanfilho/angular-foodDelivery/tree/51472cde77e64fdb00b4e33d7e7267d8ab552d87) 
 
 > Used to data transformations to show a different form. It's possible to format date, numbers, money, array JSON..
 
