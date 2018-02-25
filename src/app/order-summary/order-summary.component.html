@@ -7,7 +7,10 @@
       <p>
           Your request was received by the restaurant. Prepare the table that the food is coming!</p>
       <p><b>Avalie</b> Your Experience:</p>
-      <p><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i></p>
+      <p><fd-rating (rated) = "rated = true"></fd-rating></p>
+      <p [hidden]="!rated">
+        Thank your to your feedback!
+      </p>
     </div>
 
   </section>

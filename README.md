@@ -49,6 +49,8 @@ We will see about:
 
 > [Component using Control Value Accessor](#component-using-control-value-accessor)
 
+> [Rating](#rating)
+
 ## Install Angular
 
 > To install Angular you just need node, npm and angular-cli
@@ -2209,5 +2211,87 @@ export class OrderComponent implements OnInit {
           </div>
 
       </section>
+  </section>
+```
+## Rating
+> Commit: []()
+
+> After finish an order, the user can do a rating to inform your experience with the delivery
+
+* Let's create a new component
+```
+ng g c rating --spec=false
+```
+
+* **rating.componenet.ts**
+```javascript
+
+import { Component, OnInit, Output, EventEmitter} from '@angular/core';
+
+@Component({
+  selector: 'fd-rating',
+  templateUrl: './rating.component.html'
+})
+export class RatingComponent implements OnInit {
+  
+  @Output() rated = new EventEmitter<number>();
+  rates: number[] = [1,2,3,4,5];
+  rate: number = 0;
+
+  previousRate: number;
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+  
+  setRate(r: number) {
+    this.rate = r;
+    this.previousRate = undefined;
+    this.rated.emit(this.rate);
+  }
+
+  setTemporyRate(r: number) {
+    if (this.previousRate === undefined) {
+      this.previousRate = this.rate;
+    }
+    this.rate = r;
+  }
+  
+  clearTemporaryRate() {
+    if(this.previousRate !== undefined) {
+      this.rate = this.previousRate;
+      this.previousRate = undefined;
+    }
+  }
+}
+```
+
+* **rating.component.html**
+```html
+
+  <i *ngFor="let r of rates" class="fa"
+     [class.fa-star]="r <= rate" 
+     [class.fa-star-o]="r > rate"
+     (click)="setRate(r)"
+     (mouseenter)="setTemporyRate(r)"
+     (mouseleave)="clearTemporaryRate()"></i>
+```
+* now let's edit **order-summary.component.html**
+```html
+<section class="content-header">
+  </section>
+
+  <section class="content">
+    <div class="jumbotron">
+      <h2>Order Completed</h2>
+      <p>
+          Your request was received by the restaurant. Prepare the table that the food is coming!</p>
+      <p><b>Avalie</b> Your Experience:</p>
+      <p><fd-rating (rated) = "rated = true"></fd-rating></p>
+      <p [hidden]="!rated">
+        Thank your to your feedback!
+      </p>
+    </div>
   </section>
 ```
