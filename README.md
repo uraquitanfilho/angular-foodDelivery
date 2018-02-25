@@ -2214,7 +2214,7 @@ export class OrderComponent implements OnInit {
   </section>
 ```
 ## Rating
-> Commit: []()
+> Commit: [e35ab32](https://github.com/uraquitanfilho/angular-foodDelivery/tree/e35ab32d196513b4e7e2702072109f9085dcad2f)
 
 > After finish an order, the user can do a rating to inform your experience with the delivery
 
