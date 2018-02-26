@@ -2540,7 +2540,7 @@ imports: [
 ]
 ```
 ## Lazy Loading
-> Commit: []()
+> Commit: [a05ccf3](https://github.com/uraquitanfilho/angular-foodDelivery/commit/a05ccf32ee0cd68a83e5f3835305f724b9c99233)
 
 > Module with Lazy Loading will be load only after section route access.
 
