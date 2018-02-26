@@ -6,7 +6,7 @@ import { HomeComponent } from './home/home.component';
 import { AboutComponent } from './about/about.component';
 import { RouterModule } from '@angular/router';
 import { ROUTES } from './app.routes';
-import {FormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { RestaurantComponent } from './restaurant/restaurant.component';
 import { StoreComponent } from './restaurant/store/store.component';
 import { RestaurantService } from './restaurant/restaurant.service';
@@ -53,7 +53,8 @@ import { RatingComponent } from './rating/rating.component';
     BrowserModule,
     RouterModule.forRoot(ROUTES),
     HttpModule,
-    FormsModule
+    FormsModule,
+    ReactiveFormsModule
 
   ],
   providers: [RestaurantService, ShoppingCartService, OrderService],

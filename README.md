@@ -51,6 +51,8 @@ We will see about:
 
 > [Rating](#rating)
 
+> [Reactive Forms](#reactive-forms)
+
 ## Install Angular
 
 > To install Angular you just need node, npm and angular-cli
@@ -2062,7 +2064,7 @@ import { OrderSummaryComponent } from './order-summary/order-summary.component';
 {path: 'order-summary', component: OrderSummaryComponent} 
 ```
 
-* **src/app/order/order.component.js**
+* **src/app/order/order.component.ts**
 ```javascript
 import { Component, OnInit } from '@angular/core';
 import { RadioOption } from '../shared/radio/radio-option.model';
@@ -2294,4 +2296,244 @@ export class RatingComponent implements OnInit {
       </p>
     </div>
   </section>
+```
+
+## Reactive Forms
+> Commit: []() 
+
+> New form to angular implements forms. We will no more work with ngModel. There is a new directive.
+
+#Let's START the REFACTOR#
+
+* refactor **order.component.ts**
+```javascript
+import {FormGroup, FormBuilder} from '@angular/forms';
+
+```
+* refactor **input.component.ts**
+```javascript
+import { Component, OnInit } from '@angular/core';
+import { RadioOption } from '../shared/radio/radio-option.model';
+import { OrderService } from './order.service';
+import { CartItem } from '../restaurant-detail/shopping-cart/cart-item.model';
+import {Order, OrderItem} from './order.model';
+//to work with reactive forms
+import {FormGroup, FormBuilder, Validators, AbstractControl} from '@angular/forms';
+
+//another form to work with routes.
+import {Router} from '@angular/router';
+@Component({
+  selector: 'fd-order',
+  templateUrl: './order.component.html'
+})
+export class OrderComponent implements OnInit {
+
+   emailPattern = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+   numberPattern = /^[0-9]*$/;
+   orderForm: FormGroup;
+
+  //fixed on the code. But it can be called by a RestAPI.
+  //for this example our cost delivery = 8 always.
+  delivery: number = 8;
+
+  paymentOptions: RadioOption[] = [
+    {label: "Cache", value: "MON"},
+    {label: "Debit Card", value: "DEB"},
+    {label: "Credit Card", value: "CRE"}
+
+  ];
+  constructor(private orderService: OrderService, 
+              private router: Router,
+              private formBuilder: FormBuilder ) { }
+
+  ngOnInit() {
+    //Added to use reative forms
+    this.orderForm = this.formBuilder.group({
+        name: this.formBuilder.control('', [Validators.required, Validators.minLength(5)]),
+        email: this.formBuilder.control('',[Validators.required, Validators.pattern(this.emailPattern)]),
+        emailConfirmation: this.formBuilder.control('',[Validators.required, Validators.pattern(this.emailPattern)]),
+        address: this.formBuilder.control('',[Validators.required, Validators.minLength(5)]),
+        number: this.formBuilder.control('',[Validators.required, Validators.pattern(this.numberPattern)]),
+        optionalAddress: this.formBuilder.control(''),
+        paymentOption: this.formBuilder.control('',[Validators.required])
+    }, {validator: OrderComponent.equalsTo});
+  }
+//this is used to custom validations
+  static equalsTo(group: AbstractControl): {[key:string]: boolean} {
+    const email = group.get('email');
+    const emailConfirmation = group.get('emailConfirmation');
+    if(!email || !emailConfirmation) {
+      return undefined;
+    }
+    if(email.value !== emailConfirmation.value) {
+      return{emailsNotMatch: true} //emailsNotMatch can be any name
+    }
+    return undefined;
+  }
+
+  itemsValue(): number {
+    return this.orderService.itemsValue();
+  }
+  //to show the items
+  cartItems (): CartItem[]{
+    return this.orderService.cartItems();
+  }
+
+  increaseQty(item: CartItem){
+    this.orderService.increaseQty(item);
+  }
+
+  decreaseQty(item: CartItem) {
+    this.orderService.decreaseQty(item);
+  }
+
+  remove(item:CartItem) {
+    this.orderService.remove(item);
+  }
+ 
+  checkOrder(order: any) {
+    order.OrderItem = this.cartItems()
+      .map((item:CartItem) => new OrderItem(item.quantity, item.menuItem.id));
+    this.orderService.checkOrder(order).subscribe((orderId)=> {
+      this.router.navigate(['/order-summary']); //direct router call without routerLink
+      console.log(`finished payment: ${orderId}`);
+      this.orderService.clear();
+    });  
+    console.log(order);
+  }
+}
+
+```
+* refactor **order.component.html**
+
+> changes **<form #form="ngForm" novalidate>** to **<form [formGroup]="orderForm" novalidate>**
+> form.valid and form.value will be changed to orderForm.valid and orderForm.value
+ * orderForm is a reference created on the file **order.component.ts**
+```html
+<section class="content-header">
+  </section>
+
+  <section class="content">
+    <section class="invoice">
+          <form [formGroup]="orderForm" novalidate>
+            <div class="row">
+              <div class="col-xs-12">
+                <h2 class="page-header">
+                  <i class="fa fa-shopping-cart"></i> Finish your order
+                </h2>
+              </div>
+            </div>                
+
+            <div class="row">
+              <div class="col-xs-12 col-sm-9">
+                  <p class="lead">Client Info:</p>
+              </div>
+
+              <div class="col-xs-12 col-sm-3">
+                  <span class="help-block pull-right has-error-block" *ngIf="orderForm.hasError('emailsNotMatch')"><i class="fa fa-remove"></i>Different Email</span>
+              </div>
+
+              <div class="col-sm-6 col-xs-12">
+                  <fd-input-container errorMessage="required and min 5 characters" inputId="name" label="Name">
+                    <input class="form-control" formControlName="name" id="name" placeholder="name" autocomplete="false" />
+                  </fd-input-container>
+               </div>
+            
+              <div class="col-sm-3 col-xs-6">
+                  <fd-input-container errorMessage="Invalid email" inputId="email" label="email">
+                      <input class="form-control" formControlName="email" id="email" autocomplete="false" />
+                  </fd-input-container>
+              </div>
+              <div class="col-sm-3 col-xs-6">
+                  <fd-input-container errorMessage="Invalid email" inputId="emailConfirmation" label="Email Confirmation">
+                      <input class="form-control" formControlName="emailConfirmation" id="emailConfirmation" placeHolder="E-Mail Confirmation" autocomplete="false" />
+                  </fd-input-container>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-12">
+                <p class="lead">Delivery address:</p>
+              </div>
+              <div class="col-sm-6 col-xs-12">
+                 <fd-input-container errorMessage="required and min 5 characters" inputId="address" label="Address">
+                   <input class="form-control" formControlName="address" id="address" placeholder="Address" autocomplete="false" />
+                 </fd-input-container>
+              </div>
+              <div class="col-sm-3 col-xs-6">
+                  <fd-input-container errorMessage="required and only number" inputId="number" label="Number">
+                      <input class="form-control" formControlName="number" id="number" placeHolder="Number" autocomplete="false" />
+                  </fd-input-container>
+              </div>
+              <div class="col-sm-3 col-xs-6">
+                  <fd-input-container inputId="optionalAddress">
+                      <input type="text" class="form-control" formControlName="optionalAddress" id="optionalAddress" placeholder="Optional Address">
+                  </fd-input-container>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+
+            <!-- Table row -->
+            <div class="row">
+              <div class="col-xs-12">
+                <p class="lead">Order Items:</p>
+              </div>
+              
+                <fd-order-items [items]="cartItems()"
+                   (increaseQty)="increaseQty($event)"
+                   (decreaseQty)="decreaseQty($event)"
+                   (remove)="remove($event)"></fd-order-items>
+              
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+
+            <div class="row">
+              <!-- accepted payments column -->
+              <div class="col-sm-6 col-xs-12">
+                <p class="lead">Payment</p>
+
+                  <div class="form-group">
+
+                    <fd-radio [options]="paymentOptions" formControlName="paymentOption"></fd-radio>
+
+                  </div>
+
+              </div>
+              <!-- /.col -->
+              <div class="col-sm-6 col-xs-12">
+                <p class="lead">Delivery Cost and Total:</p>
+                <fd-delivery-cost [delivery]="delivery"
+                  [itemsValue]="itemsValue()"></fd-delivery-cost>
+              </div>
+              <!-- /.col -->
+            </div>
+
+          </form>
+
+          <div class="row">
+            <div class="col-xs-12">
+              <button (click) ="checkOrder(orderForm.value)" class="btn btn-success pull-right" 
+                      [disabled]="!orderForm.valid || cartItems().length===0">
+                      
+                      <i class="fa fa-credit-card"></i> Finish Order
+              </button>
+            </div>
+          </div>
+
+      </section>
+  </section>
+```
+
+
+
+* Edit **app.module.ts**
+```javascript
+...
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+...
+imports: [
+  ...
+  ReactiveFormsModule
+]
 ```

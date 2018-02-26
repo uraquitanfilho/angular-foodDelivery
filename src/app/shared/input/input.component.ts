@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, ContentChild, AfterContentInit } from '@angular/core';
-import { NgModel} from '@angular/forms';
+import { NgModel, FormControlName} from '@angular/forms';
 
 @Component({
   selector: 'fd-input-container',
@@ -15,15 +15,16 @@ export class InputComponent implements OnInit, AfterContentInit {
   //using contentChild, the Angular can inject references to the component.
   //To make it, we need the interface AfterContentInit
   @ContentChild(NgModel) model: NgModel;
+  @ContentChild(FormControlName) control: FormControlName; //added to use Reactive Forms
 
   constructor() { }
 
   ngOnInit() {
   }
   ngAfterContentInit() {
-    this.input = this.model;
+    this.input = this.model || this.control;
     if(this.input === undefined) {
-      throw new Error("this componenet need to be used with a ngModel Directive");
+      throw new Error("this componenet need to be used with a ngModel or FormControlName Directive");
     }
   }
 

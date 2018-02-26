@@ -3,7 +3,7 @@
 
   <section class="content">
     <section class="invoice">
-          <form #form="ngForm" novalidate>
+          <form [formGroup]="orderForm" novalidate>
             <div class="row">
               <div class="col-xs-12">
                 <h2 class="page-header">
@@ -12,23 +12,49 @@
               </div>
             </div>                
 
-            <div class="row invoice-info">
+            <div class="row">
+              <div class="col-xs-12 col-sm-9">
+                  <p class="lead">Client Info:</p>
+              </div>
+
+              <div class="col-xs-12 col-sm-3">
+                  <span class="help-block pull-right has-error-block" *ngIf="orderForm.hasError('emailsNotMatch')"><i class="fa fa-remove"></i>Different Email</span>
+              </div>
+
+              <div class="col-sm-6 col-xs-12">
+                  <fd-input-container errorMessage="required and min 5 characters" inputId="name" label="Name">
+                    <input class="form-control" formControlName="name" id="name" placeholder="name" autocomplete="false" />
+                  </fd-input-container>
+               </div>
+            
+              <div class="col-sm-3 col-xs-6">
+                  <fd-input-container errorMessage="Invalid email" inputId="email" label="email">
+                      <input class="form-control" formControlName="email" id="email" autocomplete="false" />
+                  </fd-input-container>
+              </div>
+              <div class="col-sm-3 col-xs-6">
+                  <fd-input-container errorMessage="Invalid email" inputId="emailConfirmation" label="Email Confirmation">
+                      <input class="form-control" formControlName="emailConfirmation" id="emailConfirmation" placeHolder="E-Mail Confirmation" autocomplete="false" />
+                  </fd-input-container>
+              </div>
+            </div>
+            <div class="row">
               <div class="col-xs-12">
                 <p class="lead">Delivery address:</p>
               </div>
               <div class="col-sm-6 col-xs-12">
                  <fd-input-container errorMessage="required and min 5 characters" inputId="address" label="Address">
-                   <input class="form-control" name="address" id="address" placeholder="Address" ngModel required minlength="5" autocomplete="false" />
+                   <input class="form-control" formControlName="address" id="address" placeholder="Address" autocomplete="false" />
                  </fd-input-container>
               </div>
               <div class="col-sm-3 col-xs-6">
                   <fd-input-container errorMessage="required and only number" inputId="number" label="Number">
-                      <input class="form-control" name="number" id="number" ngModel placeHolder="Number" pattern="^[0-9]*$" required autocomplete="false" />
+                      <input class="form-control" formControlName="number" id="number" placeHolder="Number" autocomplete="false" />
                   </fd-input-container>
               </div>
               <div class="col-sm-3 col-xs-6">
                   <fd-input-container inputId="optionalAddress">
-                      <input type="text" class="form-control" name="optionalAddress" ngModel id="optionalAddress" placeholder="Optional Address">
+                      <input type="text" class="form-control" formControlName="optionalAddress" id="optionalAddress" placeholder="Optional Address">
                   </fd-input-container>
               </div>
               <!-- /.col -->
@@ -57,7 +83,7 @@
 
                   <div class="form-group">
 
-                    <fd-radio [options]="paymentOptions" name="paymenetOption" ngModel required></fd-radio>
+                    <fd-radio [options]="paymentOptions" formControlName="paymentOption"></fd-radio>
 
                   </div>
 
@@ -75,8 +101,8 @@
 
           <div class="row">
             <div class="col-xs-12">
-              <button (click) ="checkOrder(form.value)" class="btn btn-success pull-right" 
-                      [disabled]="!form.valid || cartItems().length===0">
+              <button (click) ="checkOrder(orderForm.value)" class="btn btn-success pull-right" 
+                      [disabled]="!orderForm.valid || cartItems().length===0">
                       
                       <i class="fa fa-credit-card"></i> Finish Order
               </button>

@@ -7,8 +7,8 @@
       <p>
           Your request was received by the restaurant. Prepare the table that the food is coming!</p>
       <p><b>Avalie</b> Your Experience:</p>
-      <p><fd-rating (rated) = "rated = true"></fd-rating></p>
-      <p [hidden]="!rated">
+      <p><fd-rating (rated) = "rate()"></fd-rating></p>
+      <p *ngIf="rated">
         Thank your to your feedback!
       </p>
     </div>
