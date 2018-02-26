@@ -53,6 +53,8 @@ We will see about:
 
 > [Reactive Forms](#reactive-forms)
 
+> [Lazy-Loading](#lazy-loading)
+
 ## Install Angular
 
 > To install Angular you just need node, npm and angular-cli
@@ -2537,3 +2539,39 @@ imports: [
   ReactiveFormsModule
 ]
 ```
+## Lazy Loading
+> Commit: []()
+
+> Module with Lazy Loading will be load only after section route access.
+
+* Let's do a Lazy Loading with about component.
+ * Create a new module file **src/app/about/about.module.ts**
+  * To create a module, we need import **NgModule**
+  * Remove all references from **AboutComponent** on the **app.module.ts**
+  * Need remove the reference about **AboutComponent** on the **app.routes.ts** and need 
+  config a different form to **lazy loading** works.
+
+  * Let's see **about.module.ts**
+ ```javascript
+import {NgModule} from '@angular/core';
+import {Routes, RouterModule} from '@angular/router';
+import {AboutComponent} from './about.component';
+
+const ROUTES: Routes = [
+  {path: '', component: AboutComponent}
+];
+
+@NgModule({
+   declarations: [AboutComponent],
+   imports:[RouterModule.forChild(ROUTES)]
+})
+
+export class AboutModule {}
+ ``` 
+  * Refactor **app.routes.ts** 
+  ```javascript
+  ...
+  {path: 'about', loadChildren: './about/about.module#AboutModule'},
+  ...
+
+  ```
