@@ -63,6 +63,16 @@ We will see about:
 
 > [Preloading](#preloading)
 
+> [Animation](#animation)
+
+ > [Observable with Snackbar](#observable-with-snackbar)
+
+ > [Using Do and SwitchMap](#using-do-and-switchmap)
+
+ > [Transition styles and void](#transition-styles-and-void)
+
+ > [Keyframes animation](#keyframes-animation)
+
 ## Install Angular
 
 > To install Angular you just need node, npm and angular-cli
@@ -2732,7 +2742,7 @@ export class SharedModule {
 }
  ```
 ## Preloading
-> Commit: []()
+> Commit: [b293af5](https://github.com/uraquitanfilho/angular-foodDelivery/tree/b293af5f505bfb7344cfe6c121db41da1e8361d9)
 
 > good to be used to pre load lazy loading component in background.
 
@@ -2747,3 +2757,347 @@ let's import **PreLoadAllModules**
     RouterModule.forRoot(ROUTES, {preloadingStrategy: PreloadAllModules}),
   ]
 ```
+
+## Animation
+> Commit: []()
+
+> Let's install the dependences
+
+```
+npm install --save @angular/animation
+npm install --save web-animations-js
+```
+* Edit **src/app/polyfills.ts**
+```javascript
+import 'web-animations-js/web-animations.min.js'
+```
+* Go to **app.module.ts** to import the **BrowserAnimationsModule**
+```javascript
+...
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+...
+imports:[
+  ...
+   BrowserAnimationsModule
+]
+```
+* Let's create a new component **src/app/shared/messages/snackbar.component.ts**
+```
+ng g c shared/messages/snackbar --spec=false
+```
+* Edit **shared.module.ts** to export **SnackbarComponent**
+```javascript
+...
+exports:[SnackbarComponent]
+```
+* **snackbar.component.css**
+```css
+.snackbar {
+    min-width: 250px;
+    margin-left: -125px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 2px;
+    padding: 16px;
+    position: fixed;
+    z-index: 1;
+    left: 50%;
+    bottom: 30px;
+}
+```
+* **snackbar.component.html**
+```html
+<div class="snackbar" [@snack-visibility]="snackVisibility">
+  {{message}}
+</div>
+```
+* **snackbar.component.ts**
+```javascript
+import { Component, OnInit } from '@angular/core';
+import {trigger, state, style, transition, animate} from '@angular/animations';
+
+@Component({
+  selector: 'fd-snackbar',
+  templateUrl: './snackbar.component.html',
+  styleUrls: ['./snackbar.component.css'],
+  animations: [
+    trigger('snack-visibility',[
+      state('hidden', style({
+        opacity: 0,
+        bottom: '0px'
+      })),
+      state('visible', style({
+        opacity: 1,
+        bottom: '30px'        
+      })),
+      transition('hidden => visible', animate('500ms 0s ease-in')),
+      transition('visible => hiden', animate('500ms 0s ease-out'))
+    ])
+  ]
+})
+export class SnackbarComponent implements OnInit {
+  
+  message: string = "testing snackbar";
+  snackVisibility: string = "hidden";
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+}
+```
+
+* Edit **app.component.ts**
+ * changes: **<!-- snakbar deve ser aqui -->** to **<fd-snackbar></fd-snackbar>**
+
+## Observable with Snackbar
+
+> We need create a notification to snackbar knows the correct time to show the messages.
+
+* Let's create a new service **src/app/shared/messages/notification.service.ts**
+```javascript
+import { EventEmitter } from "@angular/core";
+
+export class NotificationService {
+    notifier = new EventEmitter<string>();
+
+    notify(message: string) {
+        this.notifier.emit(message);
+    }
+}
+```
+* Now let's edit **shared.module.ts** to add our new service.
+```javascript
+ ...
+ import {NotificationService} from './messages/notification.service';
+ ...
+ providers:[NotificationService]
+```
+* Let's edit **shopping-cart.service.ts**
+ * we will add the NotificationService
+ * We will learn to use the operators **Do** and **SwithMap**
+```javascript
+
+import {Injectable} from '@angular/core'
+
+import { CartItem } from "./cart-item.model";
+import { MenuItem } from "../menu-item/menu-item.model";
+import { NotificationService } from '../../shared/messages/notification.service';
+
+@Injectable()
+export class ShoppingCartService {
+    
+    items: CartItem[] = [];
+
+    constructor(private notificationService: NotificationService) {
+
+    }
+
+    clear() {
+      this.items = [];
+    }
+    
+    addItem(item:MenuItem) {
+       let foundItem = this.items.find((mItem) => mItem.menuItem.id === item.id);
+       if(foundItem) {
+         this.increaseQty(foundItem);  
+       } else {
+           this.items.push(new CartItem(item));
+       }
+       this.notificationService.notify(`${item.name} was added to your cart delivery`);
+    }
+
+    removeItem(item: CartItem) {
+       this.items.splice(this.items.indexOf(item), 1);
+       this.notificationService.notify(`${item.menuItem.name} was removed to your cart delivery`);
+    }
+
+    total(): number {
+        return this.items
+          .map(item => item.value())
+          .reduce((prev, value) => prev + value, 0); // reduce will adds two parametes, prev + value and will start with 0
+    }
+
+    increaseQty(item: CartItem) {
+      item.quantity = item.quantity + 1;
+    }
+
+    deCreaseQty(item: CartItem) {
+      item.quantity = item.quantity - 1;
+      if(item.quantity === 0) {
+        this.removeItem(item);
+      }
+    }
+}
+```
+* Edit **snackbar.component.ts**
+```javascript
+import { Component, OnInit } from '@angular/core';
+import {trigger, state, style, transition, animate} from '@angular/animations';
+import { NotificationService } from '../notification.service';
+
+import {Observable} from 'rxjs/Observable';
+import 'rxjs/add/observable/timer';
+
+@Component({
+  selector: 'fd-snackbar',
+  templateUrl: './snackbar.component.html',
+  styleUrls: ['./snackbar.component.css'],
+  animations: [
+    trigger('snack-visibility',[
+      state('hidden', style({
+        opacity: 0,
+        bottom: '0px'
+      })),
+      state('visible', style({
+        opacity: 1,
+        bottom: '30px'        
+      })),
+      transition('hidden => visible', animate('500ms 0s ease-in')),
+      transition('visible => hiden', animate('500ms 0s ease-out'))
+    ])
+  ]
+})
+export class SnackbarComponent implements OnInit {
+  
+  message: string = "testing snackbar";
+  snackVisibility: string = "hidden";
+
+  constructor(private notificationService: NotificationService) { }
+
+  ngOnInit() {
+    this.notificationService.notifier.subscribe(message => {
+      this.message = message;
+      this.snackVisibility = 'visible';
+      Observable.timer(3000).subscribe(timer => this.snackVisibility="hidden");
+    });
+  }
+
+}
+```
+
+## Using Do and SwitchMap
+
+> We have a problem now. The Observable.Timer don't works fine case you try to add many items
+at same time. Fast Touched... So we will do next steps to solve it.
+
+* Let's edit again our **snackbar.component.ts**
+```javascript
+...
+import 'rxjs/add/operator/do';
+import 'rxjs/add/operator/switchmap';
+//reafactor the method ngOnInit()
+  ngOnInit() {
+    //do permit to execute a configuration
+    this.notificationService.notifier
+      .do(message => {
+        this.message = message;
+        this.snackVisibility = 'visible';
+      
+      }).switchMap(message =>  Observable.timer(3000))
+        .subscribe(timer => this.snackVisibility='hidden');
+  }
+```
+## Transition styles and void
+
+> We will do a screen transition.
+* Let's Edit **store.component.ts**
+```javascript
+import { Component, OnInit, Input } from '@angular/core';
+
+import {Store} from './store.model';
+//to make screen animation transition
+import {trigger, state, style, transition, animation, animate} from '@angular/animations';
+
+@Component({
+  selector: 'fd-store',
+  templateUrl: './store.component.html',
+  animations: [
+    trigger('restaurantAppeared', [
+       state('ready', style({opacity:1})),
+       transition('void => ready',[
+         style({opacity:0, transform: 'translate(-30px, -10px)'}),
+         animate('300ms 0s ease-in-out')
+       ])
+    ])
+  ]
+})
+export class StoreComponent implements OnInit {
+  restaurantState = 'ready'; //added to make animation
+  @Input() store: Store;
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+}
+
+ ...
+ import {trigger, state, style, transition, animation} from '@angular/animations';
+```
+* Edit **store.component.html**
+```html
+...<!-- edit first div -->
+  <div class="place-info-box" [@restaurantAppeared]="restaurantState">
+...    
+```
+
+* Let's do same to **menu-item.component.ts**
+```javascript
+...
+import {trigger, state, style, transition, animation, animate} from '@angular/animations';
+...
+  animations: [
+    trigger('menuItemAppeared', [
+       state('ready', style({opacity:1})),
+       transition('void => ready',[
+         style({opacity:0, transform: 'translateY(-20px)'}),
+         animate('300ms 0s ease-in-in')
+       ])
+    ])
+  ]
+})
+//add a new property:
+menuItemState = 'ready'
+```
+
+* Edit too **menu-item.component.html**
+```html
+<!--edit first div-->
+   <div class="menu-item-info-box" [@menuItemAppeared]="menuItemState">
+```
+## Keyframes animation
+
+> more complex animations
+* Let's do this example on the delivery cart items
+ * Let's edit **shopping-cart.component.ts**
+```javascript
+ ...
+ import {trigger, state, style, transition, animation, animate, keyframes} from '@angular/animations';
+
+ ...
+   animations: [
+    trigger('row', [
+       state('ready', style({opacity:1})),
+       transition('void => ready', animate('300ms 0s ease-in', keyframes([
+        style({opacity:0, transform: 'translateX(-30px)', offset:0}),
+        style({opacity:0.8, transform: 'translateX(10px)', offset:0.8}),
+        style({opacity:1, transform: 'translateX(-0px)', offset:1}),
+       ]))),
+       transition('ready => void', animate('300ms 0s ease-out', keyframes([
+        style({opacity:1, transform: 'translateX(0px)', offset:0}),
+        style({opacity:0.8, transform: 'translateX(-10px)', offset:0.2}),
+        style({opacity:0, transform: 'translateX(30px)', offset:1}),
+       ])))
+    ])
+  ]
+  ...
+  //add the property
+  rowState = 'ready';
+```
+ * Edit **shopping-cart-component.html**
+ ```html
+   ...
+   <tr *ngFor="let item of items()" [@row]="rowState">
+ ``` 
