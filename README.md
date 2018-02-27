@@ -57,6 +57,8 @@ We will see about:
 
 > [Shared Module](#shared-module)
 
+> [Lazy Loading - Order](#lazy-loading-order)
+
 ## Install Angular
 
 > To install Angular you just need node, npm and angular-cli
@@ -2610,3 +2612,43 @@ import {RatingComponent} from './rating/rating.component';
 })
 export class SharedModule {}
 ```
+## Lazy Loading-Order
+> Commit: []() 
+
+> Let's do another feature module to our order. Will be a Lazy Loading as about. But now, there are more components.
+
+* Let's create a new module **src/app/order/order.module.ts**
+
+```javascript
+import {NgModule} from '@angular/core';
+//cause we need FormsModule, ReactiveForms...
+import {SharedModule} from '../shared/shared.module';
+
+//Lazy Loading need import Routes too
+import {RouterModule, Routes} from '@angular/router';
+
+import {OrderComponent} from './order.component';
+import {OrderItemsComponent} from './order-items/order-items.component';
+import {DeliveryCostComponent} from './delivery-cost/delivery-cost.component';
+
+const ROUTES: Routes = [
+    {path: '', component: OrderComponent}
+]
+@NgModule({
+  declarations:[OrderComponent, OrderItemsComponent, DeliveryCostComponent],
+  imports: [SharedModule, RouterModule.forChild(ROUTES)]
+})
+
+export class OrderModule {}
+```
+
+* Go to **app.module.ts** to remove more references:
+ * OrderComponent
+ * OrderItemsComponent
+ * DeliveryCostComponent
+
+* Go to **app.routes.ts** to edit the **order** path to be called as children.
+ * Remove the reference **OrderComponent** from imports
+```javascript
+
+``` 
