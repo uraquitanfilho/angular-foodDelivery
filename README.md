@@ -59,6 +59,8 @@ We will see about:
 
 > [Lazy Loading - Order](#lazy-loading-order)
 
+> [Core Module to isolate Providers](#core-module-to-isolate-providers)
+
 ## Install Angular
 
 > To install Angular you just need node, npm and angular-cli
@@ -2650,5 +2652,39 @@ export class OrderModule {}
 * Go to **app.routes.ts** to edit the **order** path to be called as children.
  * Remove the reference **OrderComponent** from imports
 ```javascript
-
+ {path: 'order', loadChildren: './order/order.module#OrderModule'},
 ``` 
+
+## Core Module to isolate Providers
+> Commit: []()
+
+> Sounds good to have a core module to add all providers and declare only the core on the **app.module.ts**
+
+* Create a new folder **src/app/core** and create a new module called: **core.module.ts**
+```javascript
+import {NgModule} from '@angular/core';
+
+import {OrderService} from '../order/order.service';
+import {ShoppingCartService} from '../restaurant-detail/shopping-cart/shopping-cart.service';
+import {RestaurantService} from '../restaurant/restaurant.service'
+
+@NgModule({
+    providers:[OrderService, ShoppingCartService, RestaurantService]
+})
+
+export class CoreModule {}
+```
+* Edit **app.module.ts**
+ * Remove References to:
+  * OrderService
+  * ShoppingCartService
+  * RestaurantService
+ * Import CoreModule
+ ```javascript
+  import { CoreModule } from './core/core.module';
+  ...
+  imports: [
+    ...
+    CoreModule
+  ]
+ ``` 
