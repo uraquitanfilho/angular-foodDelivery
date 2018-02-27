@@ -2656,7 +2656,7 @@ export class OrderModule {}
 ``` 
 
 ## Core Module to isolate Providers
-> Commit: []()
+> Commit: [1698407](https://github.com/uraquitanfilho/angular-foodDelivery/tree/1698407abf3e05ff0f96c8d3204a4a21e550924e)
 
 > Sounds good to have a core module to add all providers and declare only the core on the **app.module.ts**
 
