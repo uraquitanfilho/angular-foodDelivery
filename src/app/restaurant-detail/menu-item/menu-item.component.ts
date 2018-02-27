@@ -10,7 +10,7 @@ import {trigger, state, style, transition, animation, animate} from '@angular/an
        state('ready', style({opacity:1})),
        transition('void => ready',[
          style({opacity:0, transform: 'translateY(-20px)'}),
-         animate('300ms 0s ease-in-in')
+         animate('300ms 0s ease-in-out')
        ])
     ])
   ]
