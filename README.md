@@ -73,6 +73,8 @@ We will see about:
 
  > [Keyframes animation](#keyframes-animation)
 
+ > [Not Found](#not-found)
+
 ## Install Angular
 
 > To install Angular you just need node, npm and angular-cli
@@ -3101,3 +3103,36 @@ menuItemState = 'ready'
    ...
    <tr *ngFor="let item of items()" [@row]="rowState">
  ``` 
+
+## Not Found
+> Commit: []()
+
+> Lets work to make a component to prevent page not found to be redirect 
+
+* Create a new component
+```
+ng g c not-found --spec=false
+``` 
+* **src/app/not-found/not-found.component.html**
+```html
+<section class="content-header">
+</section>
+
+<!-- Main content -->
+<section class="content">
+
+  <div class="jumbotron">
+    <img src="assets/img/404.png" /><h2>Page Not Found</h2>
+    <p>
+      Are you hungry? go to our <a [routerLink]="['/restaurants']">Restaurants</a>.
+    </p>
+  </div>
+</section>
+```
+* Now we need edit our **app.routes.ts**
+```javascript
+import { NotFoundComponent } from './not-found/not-found.component';
+...
+{path: '**', component: NotFoundComponent} 
+```
+> To represent our not found page we need to use **
