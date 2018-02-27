@@ -2759,7 +2759,7 @@ let's import **PreLoadAllModules**
 ```
 
 ## Animation
-> Commit: []()
+> Commit: [2c8b761](https://github.com/uraquitanfilho/angular-foodDelivery/tree/2c8b76122b7bcbea42b019fef5e65187d5375552)
 
 > Let's install the dependences
 
