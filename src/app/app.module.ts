@@ -5,7 +5,7 @@ import { HeaderComponent } from './header/header.component';
 import { HomeComponent } from './home/home.component';
 import { RouterModule } from '@angular/router';
 import { ROUTES } from './app.routes';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+//import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { RestaurantComponent } from './restaurant/restaurant.component';
 import { StoreComponent } from './restaurant/store/store.component';
 import { RestaurantService } from './restaurant/restaurant.service';
@@ -17,15 +17,12 @@ import { MenuItemComponent } from './restaurant-detail/menu-item/menu-item.compo
 import { ReviewsComponent } from './restaurant-detail/reviews/reviews.component';
 import { OrderComponent } from './order/order.component';
 import { ShoppingCartService } from './restaurant-detail/shopping-cart/shopping-cart.service';
-import { InputComponent } from './shared/input/input.component';
-import { RadioComponent } from './shared/radio/radio.component';
 import { OrderItemsComponent } from './order/order-items/order-items.component';
 import { OrderService } from './order/order.service';
 import { DeliveryCostComponent } from './order/delivery-cost/delivery-cost.component';
 import { OrderSummaryComponent } from './order-summary/order-summary.component';
-import { RatingComponent } from './rating/rating.component';
 
-
+import { SharedModule} from './shared/shared.module';
 
 @NgModule({
   declarations: [
@@ -40,19 +37,15 @@ import { RatingComponent } from './rating/rating.component';
     MenuItemComponent,
     ReviewsComponent,
     OrderComponent,
-    InputComponent,
-    RadioComponent,
     OrderItemsComponent,
     DeliveryCostComponent,
     OrderSummaryComponent,
-    RatingComponent
   ],
   imports: [
     BrowserModule,
     RouterModule.forRoot(ROUTES),
     HttpModule,
-    FormsModule,
-    ReactiveFormsModule
+    SharedModule
 
   ],
   providers: [RestaurantService, ShoppingCartService, OrderService],

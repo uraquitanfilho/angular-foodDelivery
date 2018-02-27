@@ -55,6 +55,8 @@ We will see about:
 
 > [Lazy-Loading](#lazy-loading)
 
+> [Shared Module](#shared-module)
+
 ## Install Angular
 
 > To install Angular you just need node, npm and angular-cli
@@ -2575,3 +2577,36 @@ export class AboutModule {}
   ...
 
   ```
+## Shared Module
+> Commit: []()
+
+> Module to shared with other modules.
+
+* Go to **app.module.ts** and **REMOVE** references by:
+ * InputComponent
+ * RadioComponent
+ * RatingComponent
+ * FormsModule -> exported on the shared module
+ * ReactiveFormsModule -> exported on the shared module
+* Now we will Import our **shared.module.ts** in **app.module.ts** 
+
+* Let's create a new module **src/app/shared/shared.module.ts**
+```javascript
+import {NgModule} from '@angular/core';
+//basic directive
+import {CommonModule} from '@angular/common';
+//used by components input, radio and rating
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+
+import {InputComponent} from './input/input.component';
+import {RadioComponent} from './radio/radio.component';
+import {RatingComponent} from './rating/rating.component';
+
+@NgModule({
+    declarations: [InputComponent, RadioComponent, RatingComponent],
+    imports: [CommonModule, FormsModule, ReactiveFormsModule],
+    exports: [InputComponent, RadioComponent, RatingComponent,
+              CommonModule, FormsModule, ReactiveFormsModule]
+})
+export class SharedModule {}
+```
