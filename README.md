@@ -2578,7 +2578,7 @@ export class AboutModule {}
 
   ```
 ## Shared Module
-> Commit: []()
+> Commit: [a981b40](https://github.com/uraquitanfilho/angular-foodDelivery/tree/a981b40866737d8c6051a60b2ae431d3aabe66ba)
 
 > Module to shared with other modules.
 
