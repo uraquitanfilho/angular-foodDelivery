@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './header/header.component';
 import { HomeComponent } from './home/home.component';
-import { RouterModule } from '@angular/router';
+import { RouterModule, PreloadAllModules } from '@angular/router';
 import { ROUTES } from './app.routes';
 //import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { RestaurantComponent } from './restaurant/restaurant.component';
@@ -37,7 +37,7 @@ import { SharedModule } from './shared/shared.module';
   ],
   imports: [
     BrowserModule,
-    RouterModule.forRoot(ROUTES),
+    RouterModule.forRoot(ROUTES, {preloadingStrategy: PreloadAllModules}),
     HttpModule,
     SharedModule.forRoot(),
 

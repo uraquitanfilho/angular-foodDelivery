@@ -61,6 +61,8 @@ We will see about:
 
 > [Core Module to isolate Providers](#core-module-to-isolate-providers)
 
+> [Preloading](#preloading)
+
 ## Install Angular
 
 > To install Angular you just need node, npm and angular-cli
@@ -2690,7 +2692,7 @@ export class CoreModule {}
  ``` 
 
  ## Module With Providers
-> Commit: []()
+> Commit: [f8fdf82](https://github.com/uraquitanfilho/angular-foodDelivery/tree/f8fdf82f49e439d2c211107ccbece1a93f1136e0)
 
 > core module obsolete when we works with Module declaring providers. So
 * Let's remove the Folder and all references to **app/core** 
@@ -2729,3 +2731,19 @@ export class SharedModule {
   }
 }
  ```
+## Preloading
+> Commit: []()
+
+> good to be used to pre load lazy loading component in background.
+
+* Go to **app.module.ts**
+let's import **PreLoadAllModules**
+```javascript
+  ...
+  import { RouterModule, PreloadAllModules } from '@angular/router';
+
+  imports:[
+    ...
+    RouterModule.forRoot(ROUTES, {preloadingStrategy: PreloadAllModules}),
+  ]
+```
