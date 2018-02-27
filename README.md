@@ -2613,7 +2613,7 @@ import {RatingComponent} from './rating/rating.component';
 export class SharedModule {}
 ```
 ## Lazy Loading-Order
-> Commit: []() 
+> Commit: [85e1d62](https://github.com/uraquitanfilho/angular-foodDelivery/tree/85e1d626c768533fa3e41851fbaa68f7ddb26fc4) 
 
 > Let's do another feature module to our order. Will be a Lazy Loading as about. But now, there are more components.
 
