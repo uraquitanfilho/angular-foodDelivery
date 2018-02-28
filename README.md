@@ -3279,7 +3279,7 @@ toggleSearch(){
 ```
 
 ## HttpClient
-> Commit: []()
+> Commit: [f8b8238](https://github.com/uraquitanfilho/angular-foodDelivery/tree/f8b8238ec5980b4d040c7223ce1bee3854229cdd)
 
 > Lets do a refactor to work with **HttpClient**
 
