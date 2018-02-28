@@ -263,3 +263,17 @@ body {
     color: #dd4b39;
   }
   
+  /* restaurant search */
+  .search-link {
+    cursor: pointer;
+    color: #555;
+  }
+  
+  .search-link:hover {
+    color: #dd4b39;
+  }
+
+  .search-bar {
+    opacity:0px;
+    max-height: 0px;
+  }

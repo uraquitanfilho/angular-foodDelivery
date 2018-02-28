@@ -22,10 +22,10 @@ export class RestaurantService {
     constructor(private http: Http) {
 
     }
-    restaurants(): Observable<Store[]> {
+    restaurants(search?:string): Observable<Store[]> {
       //.map convert the result in a list of JSON 
       //Response will return many informations but we need only the JSON.
-      return this.http.get(`${URL_API}/restaurants`)
+      return this.http.get(`${URL_API}/restaurants`, {params: {q: search}})
         .map(response => response.json())
         .catch(ErrorHandler.handleError);
     }

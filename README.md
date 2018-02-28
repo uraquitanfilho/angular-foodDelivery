@@ -75,6 +75,8 @@ We will see about:
 
  > [Not Found](#not-found)
 
+ > [Search Restaurant](#search-restaurant)
+
 ## Install Angular
 
 > To install Angular you just need node, npm and angular-cli
@@ -3136,3 +3138,140 @@ import { NotFoundComponent } from './not-found/not-found.component';
 {path: '**', component: NotFoundComponent} 
 ```
 > To represent our not found page we need to use **
+
+## Search Restaurant
+> Commit: []() 
+
+* Edit **restaurant.component.html**
+```html
+<section class="content-header">
+  <h1>
+    All Restaurants
+    <a (click)="toggleSearch()" class="search-link pull-right">
+      <span *ngIf="iptSearch.value"><small>{{iptSearch.value}}</small></span><i class="fa fa-search"></i></a>
+  </h1>
+  <div class="row">
+    <div class="col-xs-12 search-bar" [@toggleSearch]="searchBarState">
+       <form [formGroup]="searchForm">
+           <div class="form-group">
+              <input type="text" #iptSearch formControlName="searchControl" class="form-control" placeholder="What are you looking for?" />
+           </div>
+       </form>
+    </div>
+  </div>
+</section>
+
+
+<section class="content">
+
+  <div class="row">
+      <div *ngFor="let restaurant of restaurants" class="col-sm-6 col-xs-12">
+         <fd-store [store]="restaurant"></fd-store>
+      </div>
+      <div *ngIf="restaurants?.length === 0" class="col-xs-12">
+          <p class="lead text-center">
+            Restaurant not found to your search.
+          </p>
+        </div>
+  </div>
+
+</section>
+
+```
+
+* Edit **restaurant.component.ts**
+```javascript
+import { Component, OnInit } from '@angular/core';
+import { Store } from './store/store.model';
+import {RestaurantService} from './restaurant.service';
+import {FormBuilder, FormControl, FormGroup} from '@angular/forms';
+import {trigger, state, style, transition, animation, animate} from '@angular/animations';
+
+import 'rxjs/add/operator/switchMap';
+import 'rxjs/add/operator/do'
+import 'rxjs/add/operator/debounceTime'
+import 'rxjs/add/operator/distinctUntilChanged'
+import 'rxjs/add/operator/catch'
+import 'rxjs/add/observable/from'
+import {Observable} from 'rxjs/Observable'
+
+@Component({
+  selector: 'fd-restaurant',
+  templateUrl: './restaurant.component.html',
+  animations: [
+    trigger('toggleSearch', [
+       state("hidden", style({
+         opacity: 0,
+         "max-height": "0px"
+       })),
+       state("visible", style({
+         opacity: 1,
+         "max-height": "70px",
+         "margin-top": "20px"
+       })),
+       transition('* => *', animate('259ms 0s ease-in-out'))
+    ])
+  ]
+})
+export class RestaurantComponent implements OnInit {
+  
+  searchBarState = 'hidden';
+  restaurants: Store[] = [];
+  
+  searchForm: FormGroup;
+  searchControl: FormControl;
+
+  constructor(private restaurantService: RestaurantService,
+              private fb: FormBuilder) { }
+//inicialization of the component
+ngOnInit() {
+
+  this.searchControl = this.fb.control('')
+  this.searchForm = this.fb.group({
+    searchControl: this.searchControl
+  })
+
+  this.searchControl.valueChanges
+      .debounceTime(500)
+      .distinctUntilChanged()
+      .switchMap(searchTerm =>
+        this.restaurantService
+          .restaurants(searchTerm)
+          .catch(error=>Observable.from([])))
+      .subscribe(restaurants => this.restaurants = restaurants)
+
+  this.restaurantService.restaurants()
+    .subscribe(restaurants => this.restaurants = restaurants)
+}
+
+toggleSearch(){
+  this.searchBarState = this.searchBarState === 'hidden' ? 'visible' : 'hidden'
+}
+}
+
+```
+
+* **Edit restaurant.service.ts**
+```javascript
+...
+ restaurants(search?:string): Observable<Store[]> {
+      //.map convert the result in a list of JSON 
+      //Response will return many informations but we need only the JSON.
+      return this.http.get(`${URL_API}/restaurants`, {params: {q: search}})
+        .map(response => response.json())
+        .catch(ErrorHandler.handleError);
+    }
+```
+
+* Edit **src/app/styles.css**
+```css
+...
+  /* restaurant search */
+  .search-link {
+    cursor: pointer;
+    color: #555;
+  }
+  .search-link: hover {
+    color: #dd4b39;
+  }
+```
