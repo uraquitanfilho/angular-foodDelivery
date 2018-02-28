@@ -76,6 +76,8 @@ We will see about:
  > [Not Found](#not-found)
 
  > [Search Restaurant](#search-restaurant)
+ 
+ > [HTTPClient](#httpclient)
 
 ## Install Angular
 
@@ -3140,7 +3142,7 @@ import { NotFoundComponent } from './not-found/not-found.component';
 > To represent our not found page we need to use **
 
 ## Search Restaurant
-> Commit: []() 
+> Commit: [8c4d727](https://github.com/uraquitanfilho/angular-foodDelivery/commit/8c4d7270c588f5911e32ca63ba6e0429b9df12d7) 
 
 * Edit **restaurant.component.html**
 ```html
@@ -3274,4 +3276,216 @@ toggleSearch(){
   .search-link: hover {
     color: #dd4b39;
   }
+```
+
+## HttpClient
+> Commit: []()
+
+> Lets do a refactor to work with **HttpClient**
+
+* **app.module.ts**
+```javascript
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { AppComponent } from './app.component';
+import { HeaderComponent } from './header/header.component';
+import { HomeComponent } from './home/home.component';
+import { RouterModule, PreloadAllModules } from '@angular/router';
+import { ROUTES } from './app.routes';
+//import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import { RestaurantComponent } from './restaurant/restaurant.component';
+import { StoreComponent } from './restaurant/store/store.component';
+//import { RestaurantService } from './restaurant/restaurant.service';
+import { RestaurantDetailComponent } from './restaurant-detail/restaurant-detail.component';
+import { HttpClientModule } from '@angular/common/http';
+import { MenuComponent } from './restaurant-detail/menu/menu.component';
+import { ShoppingCartComponent } from './restaurant-detail/shopping-cart/shopping-cart.component';
+import { MenuItemComponent } from './restaurant-detail/menu-item/menu-item.component';
+import { ReviewsComponent } from './restaurant-detail/reviews/reviews.component';
+//import { ShoppingCartService } from './restaurant-detail/shopping-cart/shopping-cart.service';
+//import { OrderService } from './order/order.service';
+import { OrderSummaryComponent } from './order-summary/order-summary.component';
+
+import { SharedModule } from './shared/shared.module';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import { NotFoundComponent } from './not-found/not-found.component';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    HeaderComponent,
+    HomeComponent,
+    RestaurantComponent,
+    StoreComponent,
+    RestaurantDetailComponent,
+    MenuComponent,
+    ShoppingCartComponent,
+    MenuItemComponent,
+    ReviewsComponent,
+    OrderSummaryComponent,
+    NotFoundComponent,
+  ],
+  imports: [
+    BrowserModule,
+    RouterModule.forRoot(ROUTES, {preloadingStrategy: PreloadAllModules}),
+    HttpClientModule,
+    SharedModule.forRoot(),
+    BrowserAnimationsModule
+
+
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+
+```
+* **restaurant.service.ts**
+```javascript
+/*We will use another service "Http service" inside a service, so.. 
+  VERY IMPORTANT: TO use service inside service you need to use the decorator @Injectable()
+*/
+import {Injectable} from '@angular/core';
+import {HttpClient, HttpParams} from '@angular/common/http';
+
+import {Store} from './store/store.model';
+
+import { URL_API } from '../app.api'; //Was imported the CONST URL_API
+//WE will to use OBSERVABLE. REMEMBER? To work with REST API need to use RXJS
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/map';
+//to work with errors
+import 'rxjs/add/operator/catch';
+//our error class
+import {ErrorHandler} from '../app.error-handler';
+import { MenuItem } from '../restaurant-detail/menu-item/menu-item.model';
+
+@Injectable()
+export class RestaurantService {
+     
+    constructor(private http: HttpClient) {
+
+    }
+    restaurants(search?:string): Observable<Store[]> {
+      let params: HttpParams = undefined;
+      if(search) {
+        params = new HttpParams().set('q', search);
+      }
+      //.map convert the result in a list of JSON 
+      //Response will return many informations but we need only the JSON.
+      return this.http.get<Store[]>(`${URL_API}/restaurants`, {params: params})
+        //.map(response => response.json())
+        //.catch(ErrorHandler.handleError);
+    }
+
+    restaurantById(id: string): Observable<Store> {
+      return this.http.get<Store>(`${URL_API}/restaurants/${id}`)
+       // .map(response => response.json())
+        //.catch(ErrorHandler.handleError);
+    }
+
+    reviewsOfRestaurant(id: string):Observable<any>{
+      return this.http.get(`${URL_API}/restaurants/${id}/reviews`)
+       // .map(response => response.json())
+       // .catch(ErrorHandler.handleError);
+    }
+
+    menuOfRestaurant(id: string): Observable<MenuItem[]> {
+      return this.http.get<MenuItem[]>(`${URL_API}/restaurants/${id}/menu`)
+      //  .map(response => response.json())
+       // .catch(ErrorHandler.handleError);
+    }
+}
+```
+* **order.services.ts**
+```javascript
+import {Injectable} from '@angular/core';
+import {ShoppingCartService} from '../restaurant-detail/shopping-cart/shopping-cart.service';
+import { CartItem } from '../restaurant-detail/shopping-cart/cart-item.model';
+import {HttpClient} from '@angular/common/http';
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/map';
+
+import {Order, OrderItem} from './order.model';
+import {URL_API} from '../app.api';
+
+@Injectable()
+export class OrderService {
+   
+    constructor(private cartService: ShoppingCartService, private http: HttpClient) {}
+
+    cartItems(): CartItem[] {
+        return this.cartService.items;
+    }
+
+    increaseQty(item: CartItem) {
+        this.cartService.increaseQty(item);
+    }
+    
+    decreaseQty(item: CartItem) {
+        this.cartService.deCreaseQty(item);
+    }
+
+    remove(item: CartItem) {
+        this.cartService.removeItem(item);
+    }
+    itemsValue(): number {
+        return this.cartService.total();
+    }
+
+    checkOrder(order: Order): Observable<string>{
+    // const headers = new Headers();
+    // headers.append('Content-Type','application/json');
+     //To work with post method, need to send the header. So to work with headers need send an object by RequestOptions
+     return this.http.post<Order>(`${URL_API}/orders`, order)
+
+                           .map(order => order.id);
+     }
+
+    clear() {
+        this.cartService.clear();
+    }
+}
+```
+* **order.model**
+```javascript
+class Order {
+   constructor(
+       public address: string,
+       public number: number,
+       public optionalAddress: string,
+       public paymentOption: string,
+       public orderItems: OrderItem[],
+       public id: string
+   ) {}
+}
+
+class OrderItem {
+    constructor(public quantity: number, public menuId: string){}
+}
+
+export { Order, OrderItem}
+```
+
+* **app.error.handler.ts**
+```javascript
+import {HttpErrorResponse} from '@angular/common/http';
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/throw';
+export class ErrorHandler {
+    static handleError(error: HttpErrorResponse | any) {
+        let errorMessage: string;
+        
+        if (error instanceof HttpErrorResponse) {
+            const body = error.error;
+            errorMessage = `${error.url}: ${error.status} - ${error.statusText || ''} ${body}`
+        }else{
+          errorMessage = error.message ? error.message : error.toString()
+        }
+        //sure, we are only show on the console. But you can to use other forms to alert the message to user.
+        //Was just to you understand how to work.
+        console.log(errorMessage);
+        return Observable.throw(errorMessage);
+    }
+}
 ```

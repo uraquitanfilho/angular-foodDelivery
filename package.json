@@ -27,6 +27,8 @@
     "font-awesome": "^4.7.0",
     "intl": "^1.2.5",
     "jquery": "^3.3.1",
+    "json-server": "^0.12.1",
+    "jsonwebtoken": "^8.1.1",
     "reflect-metadata": "^0.1.12",
     "rxjs": "^5.5.6",
     "save-dev": "^2.0.0",
