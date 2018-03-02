@@ -15,6 +15,7 @@ import { SnackbarComponent } from './messages/snackbar/snackbar.component';
 import {NotificationService} from './messages/notification.service';
 import { LoginService } from '../security/login/login.service';
 import { LoggedInGuard } from '../security/loggedin.guard';
+import { LeaveOrderGuard} from '../order/leave-order.guard';
 
 @NgModule({
     declarations: [InputComponent, RadioComponent, RatingComponent, SnackbarComponent],
@@ -31,7 +32,8 @@ export class SharedModule {
                       RestaurantService, 
                       NotificationService,
                       LoginService,
-                      LoggedInGuard]
+                      LoggedInGuard,
+                      LeaveOrderGuard] //criar classe, declarar como provider e associar na rota
       }
   }
 

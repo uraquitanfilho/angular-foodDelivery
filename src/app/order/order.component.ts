@@ -8,6 +8,9 @@ import {FormGroup, FormBuilder, Validators, AbstractControl} from '@angular/form
 
 //another form to work with routes.
 import {Router} from '@angular/router';
+
+import 'rxjs/add/operator/do';
+
 @Component({
   selector: 'fd-order',
   templateUrl: './order.component.html'
@@ -21,6 +24,7 @@ export class OrderComponent implements OnInit {
   //fixed on the code. But it can be called by a RestAPI.
   //for this example our cost delivery = 8 always.
   delivery: number = 8;
+  orderId : string;
 
   paymentOptions: RadioOption[] = [
     {label: "Cache", value: "MON"},
@@ -76,15 +80,22 @@ export class OrderComponent implements OnInit {
   remove(item:CartItem) {
     this.orderService.remove(item);
   }
- 
+  isOrderCompleted(): boolean {
+     return this.orderId !== undefined;
+  }
+
   checkOrder(order: any) {
     order.OrderItem = this.cartItems()
       .map((item:CartItem) => new OrderItem(item.quantity, item.menuItem.id));
-    this.orderService.checkOrder(order).subscribe((orderId)=> {
-      this.router.navigate(['/order-summary']); //direct router call without routerLink
-      console.log(`finished payment: ${orderId}`);
-      this.orderService.clear();
+    this.orderService.checkOrder(order)
+      .do((orderId: string) => {
+         this.orderId = orderId;
+      })
+      .subscribe((orderId)=> {
+        this.router.navigate(['/order-summary']); //direct router call without routerLink
+       // console.log(`finished payment: ${orderId}`);
+        this.orderService.clear();
     });  
-    console.log(order);
+    //console.log(order);
   }
 }
