@@ -7,15 +7,16 @@ import 'rxjs/add/operator/map';
 
 import {Order, OrderItem} from './order.model';
 import {URL_API} from '../app.api';
-import { LoginService } from '../security/login/login.service';
+//import { LoginService } from '../security/login/login.service';
 
 
 @Injectable()
 export class OrderService {
    
     constructor(private cartService: ShoppingCartService, 
-                private http: HttpClient, 
-                private loginService: LoginService) {}
+                private http: HttpClient//, 
+                //private loginService: LoginService
+               ) {}
 
     cartItems(): CartItem[] {
         return this.cartService.items;
@@ -41,10 +42,11 @@ export class OrderService {
     // headers.append('Content-Type','application/json');
      //To work with post method, need to send the header. So to work with headers need send an object by RequestOptions
      let headers = new HttpHeaders();
-     if(this.loginService.isLoggedIn()) {
-         headers = headers.set('Authorization', `Bearer ${this.loginService.user.accessToken}`);
-     }
-     return this.http.post<Order>(`${URL_API}/orders`, order, {headers})
+    /* if(this.loginService.isLoggedIn()) {
+         //this is correct but not usual. Better work with interceptors to change the header
+           //headers = headers.set('Authorization', `Bearer ${this.loginService.user.accessToken}`);
+     } */
+     return this.http.post<Order>(`${URL_API}/orders`, order)//, {headers})
 
                            .map(order => order.id);
      }
