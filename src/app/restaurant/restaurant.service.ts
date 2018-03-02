@@ -13,7 +13,6 @@ import 'rxjs/add/operator/map';
 //to work with errors
 import 'rxjs/add/operator/catch';
 //our error class
-import {ErrorHandler} from '../app.error-handler';
 import { MenuItem } from '../restaurant-detail/menu-item/menu-item.model';
 
 @Injectable()
