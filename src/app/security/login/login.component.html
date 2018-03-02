@@ -1,0 +1,27 @@
+<section class="content login-content" style="margin: 10% auto">
+  <div class="login-logo">
+       <b>foodDelivery</b> | Login
+  </div>
+  <div class="col-xs-12 col-sm-offset-3 col-sm-6 login-box-body">
+  <p class="login-box-msg">Please make your authentication to contine</p>
+
+  <form [formGroup]="loginForm">
+     <fd-input-container [showTip]=false>
+        <input type="text" formControlName="email" class="form-control" placeholder="Email">
+        <span class="glyphicon glyphicon-envelope form-control-feedback"></span>        
+     </fd-input-container>
+
+     <fd-input-container [showTip]=false>
+          <input type="password" formControlName="password" class="form-control" placeholder="Password">
+          <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+     </fd-input-container>
+    <div class="row">
+    <!-- /.col -->
+    <div class="col-xs-offset-8 col-xs-4">
+      <button type="submit" (click)="login()" [disabled]="loginForm.invalid" class="btn btn-primary btn-block btn-flat">Log In</button>
+    </div>
+    <!-- /.col -->
+    </div>
+  </form>
+  </div>
+</section>

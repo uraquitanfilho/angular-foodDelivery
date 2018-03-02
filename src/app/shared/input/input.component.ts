@@ -10,6 +10,7 @@ export class InputComponent implements OnInit, AfterContentInit {
   @Input() label: string;
   @Input() errorMessage: string;
   @Input() inputId: string;
+  @Input() showTip: boolean = true;
 
   input: any;
   //using contentChild, the Angular can inject references to the component.
